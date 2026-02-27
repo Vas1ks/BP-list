@@ -323,14 +323,36 @@
             font-size: 14px;
             color: var(--text-color);
             background-color: var(--counter-bg);
-            padding: 2px 8px;
-            border-radius: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
         }
         .counter-value {
             font-weight: bold;
             color: #4CAF50;
-            min-width: 25px;
+            min-width: 30px;
             text-align: center;
+        }
+        .counter-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        .counter-btn:hover {
+            background-color: rgba(76, 175, 80, 0.3);
+            transform: scale(1.1);
+        }
+        .counter-btn.minus:hover {
+            background-color: rgba(255, 68, 68, 0.3);
         }
 
         /* Стили для BP */
@@ -934,7 +956,7 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // ==================== ПОЛНЫЙ СПИСОК ЗАДАЧ (ВСЕ 60+) ====================
+        // ==================== ПОЛНЫЙ СПИСОК ЗАДАЧ ====================
         const DEFAULT_CHAPTERS = [
             {
                 id: "c1",
@@ -942,9 +964,30 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { id: "t1", text: "Поймать нули", done: false, bpValue: 2, hidden: false },
-                    { id: "t2", text: "Мафия", done: false, bpValue: 3, hidden: false },
-                    { id: "t3", text: "Ставка в межсерверном колесе", done: false, bpValue: 3, hidden: false }
+                    { 
+                        id: "t1", 
+                        text: "Поймать нули", 
+                        done: false, 
+                        bpValue: 2, 
+                        description: "Выиграть в рулетке, поставив на 0 или 00",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t2", 
+                        text: "Мафия", 
+                        done: false, 
+                        bpValue: 3, 
+                        description: "Сыграть в мафию в казино",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t3", 
+                        text: "Ставка в межсерверном колесе", 
+                        done: false, 
+                        bpValue: 3, 
+                        description: "Поставить ставку в межсерверном колесе от 100 фишек",
+                        hidden: false 
+                    }
                 ]
             },
             {
@@ -953,14 +996,73 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { id: "t4", text: "Большой теннис", done: false, bpValue: 1, hidden: false },
-                    { id: "t5", text: "Пинг-понг", done: false, bpValue: 1, hidden: false },
-                    { id: "t6", text: "Волейбол", done: false, bpValue: 1, hidden: false },
-                    { id: "t7", text: "Поймать рыбу", count: 20, current: 0, bpValue: 0, hidden: false },
-                    { id: "t8", text: "Сокровище", done: false, bpValue: 1, hidden: false },
-                    { id: "t9", text: "Футбол", count: 2, current: 0, bpValue: 0, hidden: false },
-                    { id: "t10", text: "Баскетбол", count: 2, current: 0, bpValue: 0, hidden: false },
-                    { id: "t11", text: "Дартс", done: false, bpValue: 1, hidden: false }
+                    { 
+                        id: "t4", 
+                        text: "Большой теннис", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Постоять 1 минуту AFK в зоне",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t5", 
+                        text: "Пинг-понг", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Постоять 1 минуту AFK в зоне",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t6", 
+                        text: "Волейбол", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Постоять 1 минуту AFK в зоне",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t7", 
+                        text: "Поймать рыбу", 
+                        count: 20, 
+                        current: 0, 
+                        bpValue: 4, 
+                        description: "Поймать 20 рыб",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t8", 
+                        text: "Сокровище", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Найти сокровище (не мусор)",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t9", 
+                        text: "Футбол", 
+                        count: 2, 
+                        current: 0, 
+                        bpValue: 1, 
+                        description: "Забить 2 гола в футболе",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t10", 
+                        text: "Баскетбол", 
+                        count: 2, 
+                        current: 0, 
+                        bpValue: 1, 
+                        description: "Забросить 2 мяча в кольцо",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t11", 
+                        text: "Дартс", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Выиграть в дартсе",
+                        hidden: false 
+                    }
                 ]
             },
             {
@@ -969,13 +1071,69 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { id: "t12", text: "Стройка", count: 25, current: 0, bpValue: 0, hidden: false },
-                    { id: "t13", text: "Порт", count: 25, current: 0, bpValue: 0, hidden: false },
-                    { id: "t14", text: "Шахта", count: 25, current: 0, bpValue: 0, hidden: false },
-                    { id: "t15", text: "Ферма", count: 10, current: 0, bpValue: 0, hidden: false },
-                    { id: "t16", text: "Рейсы на автобусе", count: 2, current: 0, bpValue: 0, hidden: false },
-                    { id: "t17", text: "Пожарный", count: 25, current: 0, bpValue: 0, hidden: false },
-                    { id: "t18", text: "Заказы на дальнобое", count: 3, current: 0, bpValue: 0, hidden: false }
+                    { 
+                        id: "t12", 
+                        text: "Стройка", 
+                        count: 25, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Выполнить 25 действий",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t13", 
+                        text: "Порт", 
+                        count: 25, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Выполнить 25 действий",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t14", 
+                        text: "Шахта", 
+                        count: 25, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Выполнить 25 действий",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t15", 
+                        text: "Ферма", 
+                        count: 10, 
+                        current: 0, 
+                        bpValue: 1, 
+                        description: "Выполнить 10 действий",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t16", 
+                        text: "Рейсы на автобусе", 
+                        count: 2, 
+                        current: 0, 
+                        bpValue: 0, 
+                        description: "Проехать 2 круга",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t17", 
+                        text: "Пожарный", 
+                        count: 25, 
+                        current: 0, 
+                        bpValue: 1, 
+                        description: "Потушить 25 огоньков",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t18", 
+                        text: "Заказы на дальнобое", 
+                        count: 3, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Отвезти 3 заказа (не клубы)",
+                        hidden: false 
+                    }
                 ]
             },
             {
@@ -984,10 +1142,38 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { id: "t19", text: "Лотерея", done: false, bpValue: 1, hidden: false },
-                    { id: "t20", text: "Match", done: false, bpValue: 1, hidden: false },
-                    { id: "t21", text: "Brawl", done: false, bpValue: 1, hidden: false },
-                    { id: "t22", text: "Сайт", done: false, bpValue: 1, hidden: false }
+                    { 
+                        id: "t19", 
+                        text: "Лотерея", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Купить лотерейный билет",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t20", 
+                        text: "Match", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Поставить лайк",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t21", 
+                        text: "Brawl", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Зайти в канал от 2 человек",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t22", 
+                        text: "Сайт", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Посетить любой сайт в браузере",
+                        hidden: false 
+                    }
                 ]
             },
             {
@@ -996,12 +1182,57 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { id: "t23", text: "Картинг", done: false, bpValue: 1, hidden: false },
-                    { id: "t24", text: "ТК", count: 5, current: 0, bpValue: 1, hidden: false },
-                    { id: "t25", text: "Арена", count: 3, current: 0, bpValue: 1, hidden: false },
-                    { id: "t26", text: "Гонка", done: false, bpValue: 1, hidden: false },
-                    { id: "t27", text: "Армреслинг", done: false, bpValue: 1, hidden: false },
-                    { id: "t28", text: "Dance-battle", count: 3, current: 0, bpValue: 2, hidden: false }
+                    { 
+                        id: "t23", 
+                        text: "Картинг", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Выиграть в заезде",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t24", 
+                        text: "ТК", 
+                        count: 5, 
+                        current: 0, 
+                        bpValue: 1, 
+                        description: "Выиграть 5 раз на ТК со ставкой от 100",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t25", 
+                        text: "Арена", 
+                        count: 3, 
+                        current: 0, 
+                        bpValue: 1, 
+                        description: "Выиграть 3 раза на арене со ставкой от 100",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t26", 
+                        text: "Гонка", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Финишировать в гонке со ставкой от 1000",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t27", 
+                        text: "Армрестлинг", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Выиграть в армрестлинг",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t28", 
+                        text: "Dance-battle", 
+                        count: 3, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Выиграть 3 дуэли в dance battle",
+                        hidden: false 
+                    }
                 ]
             },
             {
@@ -1010,10 +1241,39 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { id: "t29", text: "Аренда киностудии", done: false, bpValue: 2, hidden: false },
-                    { id: "t30", text: "Тир", done: false, bpValue: 1, hidden: false },
-                    { id: "t31", text: "Кинотеатр", count: 5, current: 0, bpValue: 5, hidden: false },
-                    { id: "t32", text: "Лизинг", done: false, bpValue: 1, hidden: false }
+                    { 
+                        id: "t29", 
+                        text: "Аренда киностудии", 
+                        done: false, 
+                        bpValue: 2, 
+                        description: "Арендовать киностудию",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t30", 
+                        text: "Тир", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Успешно пройти тренировку в тире",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t31", 
+                        text: "Кинотеатр", 
+                        count: 5, 
+                        current: 0, 
+                        bpValue: 5, 
+                        description: "Добавить 5 видео в кинотеатр",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t32", 
+                        text: "Лизинг", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Оплатить лизинг в банке",
+                        hidden: false 
+                    }
                 ]
             },
             {
@@ -1022,8 +1282,24 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { id: "t33", text: "Книгуть мячик", count: 15, current: 0, bpValue: 2, hidden: false },
-                    { id: "t34", text: "Команды", count: 15, current: 0, bpValue: 2, hidden: false }
+                    { 
+                        id: "t33", 
+                        text: "Кинуть мячик", 
+                        count: 15, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Кинуть 15 раз мячик питомцу",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t34", 
+                        text: "Команды", 
+                        count: 15, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Питомец должен правильно выполнить 15 команд",
+                        hidden: false 
+                    }
                 ]
             },
             {
@@ -1032,19 +1308,117 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { id: "t35", text: "За час онлайн", count: 8, current: 0, bpValue: 2, hidden: false },
-                    { id: "t36", text: "Тренажерный зал", count: 20, current: 0, bpValue: 1, hidden: false },
-                    { id: "t37", text: "Посылки", count: 10, current: 0, bpValue: 1, hidden: false },
-                    { id: "t38", text: "Смена внешности", count: 12, current: 0, bpValue: 2, hidden: false },
-                    { id: "t39", text: "Метро", done: false, bpValue: 2, hidden: false },
-                    { id: "t40", text: "Кейс за DP", done: false, bpValue: 10, hidden: false },
-                    { id: "t41", text: "Задания клуба", count: 2, current: 0, bpValue: 4, hidden: false },
-                    { id: "t42", text: "Охота", count: 5, current: 0, bpValue: 10, hidden: false },
-                    { id: "t43", text: "Автосервис", done: false, bpValue: 1, hidden: false },
-                    { id: "t44", text: "Обезбор/Травка", done: false, bpValue: 4, hidden: false },
-                    { id: "t45", text: "Airdrop", count: 2, current: 0, bpValue: 8, hidden: false },
-                    { id: "t46", text: "Чужое авто в автосервисе", done: false, bpValue: 2, hidden: false },
-                    { id: "t47", text: "Материалы", done: false, bpValue: 1, hidden: false }
+                    { 
+                        id: "t35", 
+                        text: "3 часа онлайн", 
+                        count: 8, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "За каждые 3 часа онлайн",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t36", 
+                        text: "Тренажерный зал", 
+                        count: 20, 
+                        current: 0, 
+                        bpValue: 1, 
+                        description: "20 успешных подходов",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t37", 
+                        text: "Посылки", 
+                        count: 10, 
+                        current: 0, 
+                        bpValue: 1, 
+                        description: "10 раз отвезти почту",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t38", 
+                        text: "Смена внешности", 
+                        count: 2, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Оплатить 2 раза смену внешности у NPC хирурга в EMS",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t39", 
+                        text: "Метро", 
+                        done: false, 
+                        bpValue: 2, 
+                        description: "Проехать 1 остановку на метро",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t40", 
+                        text: "Кейс за DP", 
+                        done: false, 
+                        bpValue: 10, 
+                        description: "Открыть Silver/Gold/Drive case за DP",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t41", 
+                        text: "Задания клуба", 
+                        count: 2, 
+                        current: 0, 
+                        bpValue: 4, 
+                        description: "Выполнить 2 задания клуба",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t42", 
+                        text: "Охота", 
+                        count: 5, 
+                        current: 0, 
+                        bpValue: 10, 
+                        description: "Снять 5 раз 100% шкуру",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t43", 
+                        text: "Автосервис", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Починить любую деталь у собственного авто",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t44", 
+                        text: "Обезбол/Травка", 
+                        done: false, 
+                        bpValue: 4, 
+                        description: "Положить 1 обезбол / посадить траву",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t45", 
+                        text: "AirDrop", 
+                        count: 2, 
+                        current: 0, 
+                        bpValue: 8, 
+                        description: "Заехать в желтую зону AirDrop",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t46", 
+                        text: "Чужое авто в автосервисе", 
+                        done: false, 
+                        bpValue: 2, 
+                        description: "Починить любую деталь у чужого авто с прочностью < 90%",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t47", 
+                        text: "Материалы", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Включить и выключить заказ материалов на бизнес",
+                        hidden: false 
+                    }
                 ]
             },
             {
@@ -1053,17 +1427,104 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { id: "t48", text: "Граффити", count: 1, current: 0, bpValue: 1, hidden: false },
-                    { id: "t49", text: "Контрабанда", count: 5, current: 0, bpValue: 2, hidden: false },
-                    { id: "t50", text: "Бизвар/Капт", count: 5, current: 0, bpValue: 1, hidden: false },
-                    { id: "t51", text: "Мед карты", count: 5, current: 0, bpValue: 2, hidden: false },
-                    { id: "t52", text: "Вызовы", count: 15, current: 0, bpValue: 2, hidden: false },
-                    { id: "t53", text: "Объявления", count: 40, current: 0, bpValue: 2, hidden: false },
-                    { id: "t54", text: "Дома/угонки", count: 15, current: 0, bpValue: 2, hidden: false },
-                    { id: "t55", text: "Коды", count: 5, current: 0, bpValue: 2, hidden: false },
-                    { id: "t56", text: "Авто на учет", count: 2, current: 0, bpValue: 1, hidden: false },
-                    { id: "t57", text: "Арест", done: false, bpValue: 1, hidden: false },
-                    { id: "t58", text: "Выкуп из КПЗ", count: 2, current: 0, bpValue: 2, hidden: false }
+                    { 
+                        id: "t48", 
+                        text: "Граффити", 
+                        count: 7, 
+                        current: 0, 
+                        bpValue: 1, 
+                        description: "Закрасить 7 граффити",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t49", 
+                        text: "Контрабанда", 
+                        count: 5, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Сдать 5 контрабанды",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t50", 
+                        text: "Бизвар/Капт", 
+                        count: 5, 
+                        current: 0, 
+                        bpValue: 1, 
+                        description: "Участие в бизнес-вар / капт",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t51", 
+                        text: "Мед карты", 
+                        count: 15, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Выдать 15 мед карт в EMS",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t52", 
+                        text: "Вызовы", 
+                        count: 15, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Закрыть 15 вызовов в EMS",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t53", 
+                        text: "Объявления", 
+                        count: 40, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Отредактировать 40 объявлений в WN",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t54", 
+                        text: "Дома/угонки", 
+                        count: 15, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Взломать 15 замков в ограблении домов или угона авто",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t55", 
+                        text: "Коды", 
+                        count: 5, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Закрыть 5 кодов в силовой гос. структуре",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t56", 
+                        text: "Авто на учет", 
+                        count: 2, 
+                        current: 0, 
+                        bpValue: 1, 
+                        description: "Поставить 2 авто на учет",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t57", 
+                        text: "Арест", 
+                        done: false, 
+                        bpValue: 1, 
+                        description: "Посадить в КПЗ",
+                        hidden: false 
+                    },
+                    { 
+                        id: "t58", 
+                        text: "Выкуп из КПЗ", 
+                        count: 2, 
+                        current: 0, 
+                        bpValue: 2, 
+                        description: "Вытащить из КПЗ",
+                        hidden: false 
+                    }
                 ]
             }
         ];
@@ -1098,13 +1559,22 @@
                 if (chapter.hidden) return;
                 chapter.tasks.forEach(task => {
                     if (task.hidden) return;
-                    if (isTaskDone(task) && task.bpValue) {
-                        let bp = task.bpValue;
-                        if (task.count) bp = bp * task.current;
-                        let multiplier = 1;
-                        if (x2Active) multiplier *= 2;
-                        if (vipActive) multiplier *= 2;
-                        total += bp * multiplier;
+                    if (task.count) {
+                        if (task.current >= task.count && task.bpValue) {
+                            let bp = task.bpValue;
+                            let multiplier = 1;
+                            if (x2Active) multiplier *= 2;
+                            if (vipActive) multiplier *= 2;
+                            total += bp * multiplier;
+                        }
+                    } else {
+                        if (task.done && task.bpValue) {
+                            let bp = task.bpValue;
+                            let multiplier = 1;
+                            if (x2Active) multiplier *= 2;
+                            if (vipActive) multiplier *= 2;
+                            total += bp * multiplier;
+                        }
                     }
                 });
             });
@@ -1155,8 +1625,14 @@
 
         function filterTask(task) {
             if (currentFilter === 'all') return true;
-            if (currentFilter === 'active') return !isTaskDone(task);
-            if (currentFilter === 'completed') return isTaskDone(task);
+            if (currentFilter === 'active') {
+                if (task.count) return task.current < task.count;
+                return !task.done;
+            }
+            if (currentFilter === 'completed') {
+                if (task.count) return task.current >= task.count;
+                return task.done;
+            }
             return true;
         }
 
@@ -1367,13 +1843,24 @@
             }
         }
 
+        function adjustCounter(chapterId, taskId, delta) {
+            const chapter = chapters.find(ch => ch.id === chapterId);
+            const task = chapter?.tasks.find(t => t.id === taskId);
+            if (task && task.count !== undefined) {
+                let newValue = (task.current || 0) + delta;
+                if (newValue < 0) newValue = 0;
+                if (newValue > task.count) newValue = task.count;
+                task.current = newValue;
+                renderChapters();
+                updateBPCounter();
+            }
+        }
+
         function toggleTask(chapterId, taskId) {
             const chapter = chapters.find(ch => ch.id === chapterId);
             const task = chapter?.tasks.find(t => t.id === taskId);
             if (task) {
-                if (task.count) {
-                    task.current = (task.current < task.count) ? (task.current || 0) + 1 : 0;
-                } else {
+                if (!task.count) {
                     task.done = !task.done;
                 }
                 renderChapters();
@@ -1428,7 +1915,7 @@
             if (newCount > 1) {
                 if (!task.count) {
                     task.count = newCount;
-                    task.current = task.done ? newCount : 0;
+                    task.current = 0;
                     delete task.done;
                 } else {
                     task.count = newCount;
@@ -1436,10 +1923,10 @@
                 }
             } else {
                 if (task.count) {
-                    task.done = task.current >= task.count;
                     delete task.count;
                     delete task.current;
                 }
+                task.done = false;
             }
 
             if (newChapterId !== chapterId) {
@@ -1579,7 +2066,9 @@
                 }
 
                 const total = chapter.tasks.filter(t => !t.hidden).length;
-                const completed = chapter.tasks.filter(t => !t.hidden && isTaskDone(t)).length;
+                const completed = chapter.tasks.filter(t => !t.hidden && (
+                    t.count ? t.current >= t.count : t.done
+                )).length;
 
                 const progress = document.createElement('span');
                 progress.className = 'chapter-progress';
@@ -1607,7 +2096,7 @@
 
                     const taskDiv = document.createElement('div');
                     const taskItem = document.createElement('div');
-                    taskItem.className = `todo-item ${isTaskDone(task) ? 'done' : ''}`;
+                    taskItem.className = `todo-item ${(task.count ? task.current >= task.count : task.done) ? 'done' : ''}`;
 
                     const mainDiv = document.createElement('div');
                     mainDiv.className = 'todo-main';
@@ -1618,11 +2107,17 @@
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.className = 'todo-checkbox';
-                    checkbox.checked = isTaskDone(task);
-                    checkbox.onchange = (e) => {
-                        e.stopPropagation();
-                        toggleTask(chapter.id, task.id);
-                    };
+                    checkbox.checked = task.count ? task.current >= task.count : task.done;
+                    
+                    if (task.count) {
+                        checkbox.disabled = true;
+                        checkbox.style.opacity = '0.5';
+                    } else {
+                        checkbox.onchange = (e) => {
+                            e.stopPropagation();
+                            toggleTask(chapter.id, task.id);
+                        };
+                    }
 
                     const textSpan = document.createElement('span');
                     textSpan.className = 'todo-text';
@@ -1635,21 +2130,43 @@
                     contentDiv.appendChild(textSpan);
 
                     if (task.count) {
-                        const counter = document.createElement('span');
-                        counter.className = 'todo-counter';
-                        counter.innerHTML = `<span class="counter-value">${task.current || 0}</span>/${task.count}`;
-                        contentDiv.appendChild(counter);
+                        const counterDiv = document.createElement('div');
+                        counterDiv.className = 'todo-counter';
+                        
+                        const minusBtn = document.createElement('button');
+                        minusBtn.className = 'counter-btn minus';
+                        minusBtn.textContent = '−';
+                        minusBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            adjustCounter(chapter.id, task.id, -1);
+                        };
+                        
+                        const valueSpan = document.createElement('span');
+                        valueSpan.className = 'counter-value';
+                        valueSpan.textContent = `${task.current || 0}/${task.count}`;
+                        
+                        const plusBtn = document.createElement('button');
+                        plusBtn.className = 'counter-btn';
+                        plusBtn.textContent = '+';
+                        plusBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            adjustCounter(chapter.id, task.id, 1);
+                        };
+                        
+                        counterDiv.appendChild(minusBtn);
+                        counterDiv.appendChild(valueSpan);
+                        counterDiv.appendChild(plusBtn);
+                        contentDiv.appendChild(counterDiv);
                     }
 
-                    if (task.bpValue > 0) {
+                    const isTaskCompleted = task.count ? task.current >= task.count : task.done;
+                    if (task.bpValue > 0 && isTaskCompleted) {
                         let displayBp = task.bpValue;
-                        if (isTaskDone(task)) {
-                            if (task.count) displayBp = task.bpValue * task.current;
-                            let multiplier = 1;
-                            if (x2Active) multiplier *= 2;
-                            if (vipActive) multiplier *= 2;
-                            displayBp *= multiplier;
-                        }
+                        let multiplier = 1;
+                        if (x2Active) multiplier *= 2;
+                        if (vipActive) multiplier *= 2;
+                        displayBp *= multiplier;
+                        
                         const bpSpan = document.createElement('span');
                         bpSpan.className = 'todo-bp';
                         bpSpan.textContent = `+${displayBp}`;
@@ -1713,10 +2230,6 @@
             }
         }
 
-        function isTaskDone(task) {
-            return task.count ? (task.current >= task.count) : task.done;
-        }
-
         function initDragAndDrop() {
             document.querySelectorAll('.chapter-tasks').forEach(tasksContainer => {
                 new Sortable(tasksContainer, {
@@ -1725,7 +2238,7 @@
                     ghostClass: 'todo-item-ghost',
                     dragClass: 'todo-item-drag',
                     onEnd: function() {
-                        // Здесь можно обновить порядок в данных, но пока оставим
+                        // Порядок задач можно сохранять, но пока не критично
                     }
                 });
             });
@@ -1734,7 +2247,9 @@
         // ==================== Админ функции ====================
         function adminCollapseAllDone() {
             chapters.forEach(ch => {
-                const allDone = ch.tasks.every(t => isTaskDone(t));
+                const allDone = ch.tasks.every(t => 
+                    t.count ? t.current >= t.count : t.done
+                );
                 if (allDone && ch.tasks.length > 0) ch.collapsed = true;
             });
             renderChapters();
@@ -1747,7 +2262,9 @@
 
         function adminDeleteAllDone() {
             chapters.forEach(ch => {
-                ch.tasks = ch.tasks.filter(t => !isTaskDone(t));
+                ch.tasks = ch.tasks.filter(t => 
+                    t.count ? t.current < t.count : !t.done
+                );
             });
             renderChapters();
             updateAdminUI();
