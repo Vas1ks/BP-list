@@ -158,6 +158,7 @@
             display: flex;
             gap: 10px;
             justify-content: center;
+            flex-wrap: wrap;
         }
         .filter-btn {
             background-color: var(--filter-btn-bg);
@@ -834,6 +835,8 @@
         <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">Все</button>
         <button class="filter-btn" data-filter="active" onclick="setFilter('active')">Активные</button>
         <button class="filter-btn" data-filter="completed" onclick="setFilter('completed')">Выполненные</button>
+        <button class="filter-btn" onclick="restartTasks()">🔄 Restart</button>
+        <button class="filter-btn" onclick="hardRestartTasks()">💣 Hard Restart</button>
     </div>
 
     <div class="container">
@@ -932,7 +935,6 @@
         }
 
         // ==================== Данные с твоими задачами ====================
-        // Это шаблон для новых пользователей
         const DEFAULT_CHAPTERS = [
             {
                 id: "c1",
@@ -974,7 +976,7 @@
             }
         ];
 
-        // Загружаем данные: если у пользователя уже есть свои — берём их, иначе ставим шаблон
+        // Загружаем данные
         let chapters = JSON.parse(localStorage.getItem('chapters'));
         if (!chapters) {
             chapters = DEFAULT_CHAPTERS;
@@ -1064,6 +1066,34 @@
             if (currentFilter === 'active') return !isTaskDone(task);
             if (currentFilter === 'completed') return isTaskDone(task);
             return true;
+        }
+
+        // ==================== Restart и Hard Restart ====================
+        function restartTasks() {
+            if (confirm('Сбросить все галочки и счётчики? Прогресс будет потерян.')) {
+                chapters.forEach(chapter => {
+                    chapter.tasks.forEach(task => {
+                        if (task.count) {
+                            task.current = 0;
+                        } else {
+                            task.done = false;
+                        }
+                    });
+                });
+                renderChapters();
+                updateAdminUI();
+                alert('Готово! Все задачи сброшены.');
+            }
+        }
+
+        function hardRestartTasks() {
+            if (confirm('ПОЛНЫЙ СБРОС: Вернуть всё к состоянию по умолчанию?')) {
+                localStorage.removeItem('chapters');
+                chapters = JSON.parse(JSON.stringify(DEFAULT_CHAPTERS));
+                renderChapters();
+                updateAdminUI();
+                alert('Готово! Начальный список восстановлен.');
+            }
         }
 
         // ==================== Админка ====================
@@ -1456,7 +1486,6 @@
                     };
                 }
 
-                const visibleTasks = chapter.tasks.filter(t => !t.hidden && filterTask(t));
                 const total = chapter.tasks.filter(t => !t.hidden).length;
                 const completed = chapter.tasks.filter(t => !t.hidden && isTaskDone(t)).length;
 
