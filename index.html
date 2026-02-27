@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>BP list</title>
+    <!-- SortableJS для drag & drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <style>
+        /* CSS переменные для тем */
+        :root {
+            --bg-color: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            --container-bg: rgba(30, 30, 30, 0.95);
+            --text-color: #fff;
+            --chapter-bg: #2a2a2a;
+            --chapter-header-bg: #333;
+            --border-color: #444;
+            --todo-hover: #3a3a3a;
+            --counter-bg: #3a3a3a;
+            --desc-bg: #333;
+            --modal-bg: #2a2a2a;
+            --input-bg: #333;
+            --footer-bg: rgba(0, 0, 0, 0.8);
+            --filter-btn-bg: #2a2a2a;
+            --filter-btn-color: #aaa;
+            --filter-btn-active: #4CAF50;
+            --transition: all 0.3s ease;
+            --done-bg: rgba(76, 175, 80, 0.25);
+            --done-border: #4CAF50;
+            --done-text: #888;
+        }
+        body.light-theme {
+            --bg-color: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            --container-bg: rgba(255, 255, 255, 0.95);
+            --text-color: #333;
+            --chapter-bg: #ffffff;
+            --chapter-header-bg: #f0f0f0;
+            --border-color: #ddd;
+            --todo-hover: #f5f5f5;
+            --counter-bg: #f0f0f0;
+            --desc-bg: #f9f9f9;
+            --modal-bg: #ffffff;
+            --input-bg: #f5f5f5;
+            --footer-bg: rgba(255, 255, 255, 0.9);
+            --filter-btn-bg: #f0f0f0;
+            --filter-btn-color: #666;
+            --done-bg: rgba(76, 175, 80, 0.15);
+            --done-text: #666;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: var(--bg-color);
+            position: relative;
+            padding-bottom: 100px;
+            box-sizing: border-box;
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* BP счетчик сверху */
+        .bp-header {
+            max-width: 600px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .bp-counter {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: 2px solid #4CAF50;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .bp-icon {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .bp-bonuses {
+            display: flex;
+            gap: 10px;
+        }
+        .bonus-btn {
+            background-color: white;
+            border: 2px solid;
+            padding: 8px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .bonus-btn.x2 {
+            border-color: #ff9800;
+            color: #ff9800;
+        }
+        .bonus-btn.x2.active {
+            background-color: #ff9800;
+            color: white;
+        }
+        .bonus-btn.vip {
+            border-color: #9c27b0;
+            color: #9c27b0;
+        }
+        .bonus-btn.vip.active {
+            background-color: #9c27b0;
+            color: white;
+        }
+
+        /* Кнопки справа: шестеренка и тема */
+        .settings-buttons {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+        .icon-btn {
+            background-color: var(--container-bg);
+            border: 2px solid #4CAF50;
+            color: var(--text-color);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .icon-btn:hover {
+            transform: scale(1.1);
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Фильтры и кнопки рестарта */
+        .action-bar {
+            max-width: 600px;
+            margin: 10px auto 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            background-color: var(--filter-btn-bg);
+            border: 1px solid var(--border-color);
+            color: var(--filter-btn-color);
+            padding: 8px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: var(--transition);
+        }
+        .filter-btn.active {
+            background-color: var(--filter-btn-active);
+            color: white;
+            border-color: var(--filter-btn-active);
+        }
+        .restart-btn {
+            background-color: #ff9800;
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: var(--transition);
+        }
+        .restart-btn:hover {
+            background-color: #f57c00;
+            transform: scale(1.05);
+        }
+        .restart-btn.hard {
+            background-color: #f44336;
+        }
+        .restart-btn.hard:hover {
+            background-color: #d32f2f;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: var(--container-bg);
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s;
+        }
+        h1 {
+            text-align: center;
+            color: var(--text-color);
+            margin-top: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Стили для глав */
+        .chapter {
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: var(--chapter-bg);
+            transition: var(--transition);
+        }
+        .chapter-header {
+            background-color: var(--chapter-header-bg);
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+        }
+        .chapter-header:hover {
+            background-color: var(--todo-hover);
+        }
+        .chapter-title {
+            flex-grow: 1;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 2px 5px;
+            border-radius: 4px;
+            color: var(--text-color);
+        }
+        body.admin-mode .chapter-title:hover {
+            background-color: rgba(76, 175, 80, 0.3);
+        }
+        .chapter-progress {
+            font-size: 14px;
+            color: #aaa;
+            margin-right: 5px;
+        }
+        .chapter-arrow {
+            font-size: 12px;
+            color: #888;
+            transition: transform 0.3s;
+        }
+        .chapter.collapsed .chapter-arrow {
+            transform: rotate(-90deg);
+        }
+        .chapter.collapsed .chapter-tasks {
+            display: none;
+        }
+        .chapter-tasks {
+            padding: 10px;
+            background-color: var(--chapter-bg);
+            min-height: 50px;
+            transition: opacity 0.3s;
+        }
+        /* Анимация для задач */
+        .todo-item {
+            display: flex;
+            flex-direction: column;
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+            opacity: 1;
+            transform-origin: top;
+            animation: slideIn 0.3s ease;
+            position: relative;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* ✅ ВЫПОЛНЕННЫЕ ЗАДАЧИ - ЯРКОЕ ВЫДЕЛЕНИЕ */
+        .todo-item.done {
+            background-color: var(--done-bg) !important;
+            border-left: 4px solid var(--done-border) !important;
+            border-radius: 4px;
+            margin: 4px 0;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            opacity: 1;
+            position: relative;
+        }
+        .todo-item.done .todo-text {
+            text-decoration: line-through !important;
+            text-decoration-thickness: 2px;
+            color: var(--done-text) !important;
+            font-weight: 500;
+            position: relative;
+            padding-left: 28px;
+        }
+        .todo-item.done .todo-text::before {
+            content: "✅";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+        }
+        .todo-item.done .todo-checkbox {
+            accent-color: #2e7d32;
+            opacity: 0.9;
+        }
+        .todo-item.done .todo-bp {
+            opacity: 0.7;
+            background-color: rgba(255, 152, 0, 0.1);
+        }
+        .todo-item.done .todo-counter {
+            opacity: 0.8;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        /* Дополнительный визуальный эффект */
+        .todo-item.done::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(76, 175, 80, 0.1) 0%, transparent 100%);
+            pointer-events: none;
+            border-radius: 4px;
+        }
+
+        .todo-main {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .todo-content {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .todo-text {
+            padding: 5px 5px 5px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: background-color 0.2s;
+            min-width: 150px;
+        }
+        .todo-text:hover {
+            background-color: var(--todo-hover);
+        }
+        .todo-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #4CAF50;
+            transition: transform 0.2s;
+        }
+        .todo-checkbox:hover {
+            transform: scale(1.1);
+        }
+
+        /* Стили для счетчика */
+        .counter-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: var(--counter-bg);
+            border-radius: 12px;
+            padding: 2px;
+        }
+        .todo-counter {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            color: var(--text-color);
+            padding: 2px 8px;
+        }
+        .counter-value {
+            font-weight: bold;
+            color: #4CAF50;
+            min-width: 25px;
+            text-align: center;
+        }
+        .counter-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0 5px;
+            transition: transform 0.2s;
+        }
+        .counter-btn:hover {
+            transform: scale(1.2);
+            color: #4CAF50;
+        }
+
+        /* Стили для BP */
+        .todo-bp {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 14px;
+            color: #ff9800;
+            background-color: rgba(255, 152, 0, 0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .todo-bp::before {
+            content: "💰";
+            font-size: 12px;
+            margin-right: 2px;
+        }
+
+        /* Кнопки админа */
+        .admin-controls {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+        .admin-btn-small {
+            width: 24px;
+            height: 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .admin-btn-small.add {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .admin-btn-small.add:hover {
+            background-color: #45a049;
+            transform: scale(1.1);
+        }
+        .admin-btn-small.delete {
+            background-color: #ff4444;
+            color: white;
+        }
+        .admin-btn-small.delete:hover {
+            background-color: #cc0000;
+            transform: scale(1.1);
+        }
+        .admin-btn-small.edit {
+            background-color: #2196F3;
+            color: white;
+            font-size: 14px;
+        }
+        .admin-btn-small.edit:hover {
+            background-color: #1976D2;
+            transform: scale(1.1);
+        }
+        .admin-btn-small.move {
+            background-color: #FF9800;
+            color: white;
+            font-size: 16px;
+        }
+        .admin-btn-small.move:hover {
+            background-color: #F57C00;
+            transform: scale(1.1);
+        }
+
+        /* Описание задачи */
+        .todo-description {
+            font-size: 12px;
+            color: #ccc;
+            margin-left: 28px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            padding: 8px 12px;
+            background-color: var(--desc-bg);
+            border-radius: 4px;
+            border-left: 3px solid #2196F3;
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        .todo-description.visible {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Модальное окно */
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--modal-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.8);
+            z-index: 2000;
+            display: none;
+            width: 400px;
+            max-width: 90%;
+            border: 1px solid #4CAF50;
+            color: var(--text-color);
+            animation: modalAppear 0.3s;
+        }
+        @keyframes modalAppear {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+        .modal.visible {
+            display: block;
+        }
+        .modal h3 {
+            margin-top: 0;
+            color: var(--text-color);
+        }
+        .modal input, .modal textarea, .modal select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: Arial, sans-serif;
+            box-sizing: border-box;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            transition: border-color 0.2s;
+        }
+        .modal input:focus, .modal textarea:focus, .modal select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        .modal-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .modal-row input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .modal-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .modal-btn.save {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .modal-btn.save:hover {
+            background-color: #45a049;
+        }
+        .modal-btn.cancel {
+            background-color: #555;
+            color: #fff;
+        }
+        .modal-btn.cancel:hover {
+            background-color: #666;
+        }
+
+        /* Меню переноса */
+        .move-menu {
+            position: absolute;
+            background-color: var(--modal-bg);
+            border: 1px solid #4CAF50;
+            border-radius: 6px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+            padding: 10px;
+            z-index: 100;
+            display: none;
+            animation: fadeIn 0.2s;
+        }
+        .move-menu.visible {
+            display: block;
+        }
+        .move-menu select {
+            width: 200px;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+        .move-menu button {
+            width: 100%;
+            padding: 8px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Панель видимости (список глаз) */
+        .visibility-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        .visibility-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+            animation: slideIn 0.2s;
+        }
+        .visibility-item.chapter {
+            font-weight: bold;
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+        .visibility-item .item-name {
+            flex: 1;
+        }
+        .visibility-item .item-name.task {
+            margin-left: 20px;
+        }
+        .eye-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 5px;
+            transition: transform 0.2s;
+        }
+        .eye-btn:hover {
+            transform: scale(1.2);
+        }
+
+        /* Футер */
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .footer-item {
+            background-color: var(--footer-bg);
+            padding: 10px 15px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(5px);
+            border: 1px solid #4CAF50;
+            transition: transform 0.2s;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+        .footer-item:hover {
+            transform: scale(1.05);
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+        .youtube-logo {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(45deg, #FF0000, #CC0000);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .youtube-logo::before {
+            content: "▶";
+            font-size: 12px;
+            margin-left: 1px;
+        }
+        .twitch-logo {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(45deg, #6441A5, #4b367c);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .twitch-logo::before {
+            content: "⚡";
+            font-size: 14px;
+        }
+        .donate-logo {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(45deg, #ff6b6b, #ff4757);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .donate-logo::before {
+            content: "❤️";
+            font-size: 14px;
+        }
+        .footer-text {
+            display: flex;
+            flex-direction: column;
+        }
+        .channel-name {
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .product-by {
+            font-size: 10px;
+            color: #aaa;
+        }
+        .product-by span {
+            color: #FF0000;
+            font-weight: bold;
+        }
+
+        /* Админ-панель */
+        .admin-panel {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.95);
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            color: #fff;
+            border: 2px solid #4CAF50;
+            display: none;
+        }
+        .admin-panel.visible {
+            display: block;
+            animation: slideIn 0.3s;
+        }
+        .admin-title {
+            text-align: center;
+            color: #4CAF50;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .admin-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+        .admin-section h3 {
+            margin-top: 0;
+            color: #4CAF50;
+            font-size: 16px;
+        }
+        .admin-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            background-color: #222;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .admin-row {
+            display: flex;
+            gap: 10px;
+        }
+        .admin-row .admin-input {
+            flex: 1;
+        }
+        .admin-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 15px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 13px;
+            transition: background-color 0.2s;
+        }
+        .admin-btn:hover {
+            background-color: #45a049;
+        }
+        .admin-btn.danger {
+            background-color: #ff4444;
+        }
+        .admin-btn.warning {
+            background-color: #ffbb33;
+            color: #333;
+        }
+
+        /* Пароль */
+        .password-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.95);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
+            z-index: 2000;
+            border: 2px solid #4CAF50;
+            display: none;
+        }
+        .password-modal.visible {
+            display: block;
+            animation: modalAppear 0.3s;
+        }
+        .password-modal input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #222;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Модалка для пароля -->
+    <div class="password-modal" id="passwordModal">
+        <h3 style="color: #4CAF50; text-align: center; margin-top: 0;">Вход в админ-панель</h3>
+        <input type="password" id="passwordInput" placeholder="Введите пароль">
+        <button class="admin-btn" onclick="checkPassword()" style="width: 100%;">Войти</button>
+    </div>
+
+    <!-- Модалка для редактирования задачи -->
+    <div class="modal" id="editTaskModal">
+        <h3>✏️ Редактирование задачи</h3>
+        <input type="text" id="editTaskText" placeholder="Текст задачи">
+        <div class="modal-row">
+            <input type="number" id="editTaskCount" placeholder="Количество" min="1" value="1">
+            <input type="number" id="editTaskBP" placeholder="BP за всё задание" min="0" value="0">
+        </div>
+        <textarea id="editTaskDescription" placeholder="Описание задачи (необязательно)"></textarea>
+        <select id="editTaskChapter"></select>
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" onclick="closeEditModal()">Отмена</button>
+            <button class="modal-btn save" onclick="saveTaskEdit()">Сохранить</button>
+        </div>
+    </div>
+
+    <!-- Модалка для настроек видимости -->
+    <div class="modal" id="visibilityModal">
+        <h3>👁️ Настройки видимости</h3>
+        <div class="visibility-list" id="visibilityList"></div>
+        <div class="modal-buttons">
+            <button class="modal-btn save" onclick="showAllVisibility()">Показать всё</button>
+            <button class="modal-btn cancel" onclick="closeVisibilityModal()">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Меню переноса -->
+    <div class="move-menu" id="moveMenu">
+        <select id="moveChapterSelect"></select>
+        <button onclick="moveTask()">Перенести</button>
+    </div>
+
+    <!-- BP счетчик и бонусы + кнопки -->
+    <div class="bp-header">
+        <div class="bp-bonuses">
+            <button class="bonus-btn x2" onclick="toggleBonus('x2')" id="x2Btn">X2</button>
+            <button class="bonus-btn vip" onclick="toggleBonus('vip')" id="vipBtn">VIP</button>
+        </div>
+        <div class="settings-buttons">
+            <button class="icon-btn" id="visibilityBtn" onclick="openVisibilityModal()" title="Настройки видимости">⚙️</button>
+            <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Сменить тему">🌞</button>
+        </div>
+        <div class="bp-counter">
+            <span class="bp-icon">BP</span>
+            <span id="bpTotal">0</span>
+        </div>
+    </div>
+
+    <!-- Фильтры и кнопки рестарта -->
+    <div class="action-bar">
+        <button class="filter-btn" data-filter="all" onclick="setFilter('all')">Все</button>
+        <button class="filter-btn" data-filter="active" onclick="setFilter('active')">Активные</button>
+        <button class="filter-btn" data-filter="completed" onclick="setFilter('completed')">Выполненные</button>
+        <button class="restart-btn" onclick="restartTasks()">🔄 Restart</button>
+        <button class="restart-btn hard" onclick="hardRestart()">💣 Hard Restart</button>
+    </div>
+
+    <div class="container">
+        <h1>BP list</h1>
+        <div id="chaptersList"></div>
+    </div>
+
+    <!-- Админ-панель -->
+    <div class="admin-panel" id="adminPanel">
+        <h2 class="admin-title">⚙️ Панель управления</h2>
+        
+        <div class="admin-section">
+            <h3>📚 Главы</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="newChapterName" class="admin-input" placeholder="Название главы" style="margin-bottom: 0;">
+                <button class="admin-btn" onclick="addChapter()" style="white-space: nowrap;">➕ Добавить</button>
+            </div>
+            <div id="chaptersList-admin"></div>
+        </div>
+        
+        <div class="admin-section">
+            <h3>➕ Задачи</h3>
+            <select id="taskChapter" class="admin-input"></select>
+            <div class="admin-row">
+                <input type="text" id="adminNewTodo" class="admin-input" placeholder="Текст задачи">
+                <input type="number" id="taskCount" class="admin-input" placeholder="Кол-во" value="1" min="1" style="width: 80px;">
+            </div>
+            <div class="admin-row">
+                <input type="number" id="taskBP" class="admin-input" placeholder="BP за всё" value="0" min="0">
+            </div>
+            <button class="admin-btn" onclick="adminAddTodo()" style="width: 100%;">Добавить задачу</button>
+        </div>
+        
+        <div class="admin-section">
+            <h3>📝 Массовое добавление</h3>
+            <textarea id="bulkTodos" class="admin-input" placeholder="Формат: Текст | Количество | BP за всё" rows="4"></textarea>
+            <select id="bulkChapter" class="admin-input"></select>
+            <button class="admin-btn" onclick="adminAddBulk()" style="width: 100%;">Добавить все</button>
+        </div>
+        
+        <div class="admin-section">
+            <h3>💾 Импорт/Экспорт</h3>
+            <textarea id="importExportData" class="admin-input" readonly rows="4"></textarea>
+            <div style="display: flex; gap: 10px;">
+                <button class="admin-btn" onclick="adminExport()" style="flex: 1;">📋 Копировать</button>
+                <button class="admin-btn warning" onclick="adminImport()" style="flex: 1;">📂 Импорт</button>
+            </div>
+        </div>
+        
+        <div class="admin-section">
+            <h3>🔧 Управление</h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="admin-btn warning" onclick="adminCollapseAllDone()">📁 Свернуть готовые</button>
+                <button class="admin-btn warning" onclick="adminExpandAll()">📂 Развернуть всё</button>
+                <button class="admin-btn danger" onclick="adminDeleteAllDone()">✅ Удалить готовые</button>
+                <button class="admin-btn danger" onclick="adminClearAll()">🗑️ Очистить всё</button>
+                <button class="admin-btn danger" onclick="adminLogout()">🚪 Выйти</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Футер -->
+    <div class="footer">
+        <a href="https://www.youtube.com/@vas1ks777" target="_blank" class="footer-item">
+            <div class="youtube-logo"></div>
+            <div class="footer-text">
+                <span class="channel-name">YouTube</span>
+                <span class="product-by">@vas1ks777</span>
+            </div>
+        </a>
+        <a href="https://www.twitch.tv/vas1ks0_0" target="_blank" class="footer-item">
+            <div class="twitch-logo"></div>
+            <div class="footer-text">
+                <span class="channel-name">Twitch</span>
+                <span class="product-by">vas1ks0_0</span>
+            </div>
+        </a>
+        <a href="https://www.donationalerts.com/r/vas1ks0_0" target="_blank" class="footer-item">
+            <div class="donate-logo"></div>
+            <div class="footer-text">
+                <span class="channel-name">Donate</span>
+                <span class="product-by">Поддержать проект</span>
+            </div>
+        </a>
+    </div>
+
+    <script>
+        // ==================== Пароль ====================
+        const ADMIN_PASSWORD = "314159";
+
+        // ==================== Данные ====================
+        let chapters = JSON.parse(localStorage.getItem('chapters')) || [];
+        let isAdmin = false;
+        let currentEditTask = null;
+        let currentMoveTask = null;
+        let x2Active = false;
+        let vipActive = false;
+        let currentFilter = localStorage.getItem('filter') || 'all';
+
+        // Тема
+        let isDarkTheme = localStorage.getItem('theme') !== 'light';
+        if (!isDarkTheme) document.body.classList.add('light-theme');
+        updateThemeIcon();
+
+        // Инициализация структуры
+        if (chapters.length === 0) {
+            chapters.push({
+                id: generateId(),
+                name: 'Основные задачи',
+                collapsed: false,
+                hidden: false,
+                tasks: []
+            });
+        } else {
+            chapters.forEach(ch => {
+                if (ch.hidden === undefined) ch.hidden = false;
+                ch.tasks.forEach(t => {
+                    if (t.hidden === undefined) t.hidden = false;
+                });
+            });
+        }
+
+        function generateId() {
+            return Date.now() + Math.random().toString(36).substr(2, 9);
+        }
+
+        // ==================== BP и бонусы ====================
+        // Отображаемый BP (потенциальная награда за всё задание с бонусами)
+        function getDisplayBP(task) {
+            if (!task.bpValue) return 0;
+            let multiplier = 1;
+            if (x2Active) multiplier *= 2;
+            if (vipActive) multiplier *= 2;
+            return task.bpValue * multiplier;
+        }
+
+        // Реальный BP при выполнении (начисляется один раз)
+        function calculateTaskBP(task) {
+            if (!task.bpValue) return 0;
+            let multiplier = 1;
+            if (x2Active) multiplier *= 2;
+            if (vipActive) multiplier *= 2;
+            return task.bpValue * multiplier;
+        }
+
+        function calculateTotalBP() {
+            let total = 0;
+            chapters.forEach(chapter => {
+                if (chapter.hidden) return;
+                chapter.tasks.forEach(task => {
+                    if (task.hidden) return;
+                    if (isTaskDone(task)) {
+                        total += calculateTaskBP(task);
+                    }
+                });
+            });
+            return Math.round(total);
+        }
+
+        function updateBPCounter() {
+            document.getElementById('bpTotal').textContent = calculateTotalBP();
+        }
+
+        function toggleBonus(bonus) {
+            if (bonus === 'x2') {
+                x2Active = !x2Active;
+                document.getElementById('x2Btn').classList.toggle('active');
+            } else if (bonus === 'vip') {
+                vipActive = !vipActive;
+                document.getElementById('vipBtn').classList.toggle('active');
+            }
+            updateBPCounter();
+            renderChapters();
+        }
+
+        // ==================== Тема ====================
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            if (isDarkTheme) {
+                document.body.classList.remove('light-theme');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.add('light-theme');
+                localStorage.setItem('theme', 'light');
+            }
+            updateThemeIcon();
+        }
+        function updateThemeIcon() {
+            document.getElementById('themeBtn').textContent = isDarkTheme ? '🌞' : '🌙';
+        }
+
+        // ==================== Фильтры ====================
+        function setFilter(filter) {
+            currentFilter = filter;
+            localStorage.setItem('filter', filter);
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            renderChapters();
+        }
+
+        function filterTask(task) {
+            if (currentFilter === 'all') return true;
+            if (currentFilter === 'active') return !isTaskDone(task);
+            if (currentFilter === 'completed') return isTaskDone(task);
+            return true;
+        }
+
+        // ==================== Restart ====================
+        function restartTasks() {
+            chapters.forEach(chapter => {
+                chapter.tasks.forEach(task => {
+                    if (task.count) {
+                        task.current = 0;
+                    } else {
+                        task.done = false;
+                    }
+                });
+            });
+            renderChapters();
+            updateBPCounter();
+        }
+
+        function hardRestart() {
+            if (confirm('Вы уверены? Hard Restart сбросит все отметки и вернёт видимость всех задач.')) {
+                chapters.forEach(chapter => {
+                    chapter.hidden = false;
+                    chapter.collapsed = false;
+                    chapter.tasks.forEach(task => {
+                        task.hidden = false;
+                        if (task.count) {
+                            task.current = 0;
+                        } else {
+                            task.done = false;
+                        }
+                    });
+                });
+                renderChapters();
+                updateBPCounter();
+            }
+        }
+
+        // ==================== Админка ====================
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && (e.key === '`' || e.key === 'ё' || e.key === '~')) {
+                e.preventDefault();
+                if (!isAdmin) {
+                    document.getElementById('passwordModal').classList.add('visible');
+                    document.getElementById('passwordInput').focus();
+                } else {
+                    toggleAdminPanel();
+                }
+            }
+        });
+
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            if (input === ADMIN_PASSWORD) {
+                document.getElementById('passwordModal').classList.remove('visible');
+                isAdmin = true;
+                document.body.classList.add('admin-mode');
+                showAdminPanel();
+                renderChapters();
+                updateAdminUI();
+            } else {
+                alert('Неверный пароль!');
+            }
+        }
+
+        function toggleAdminPanel() {
+            const panel = document.getElementById('adminPanel');
+            panel.classList.toggle('visible');
+            if (panel.classList.contains('visible')) updateAdminUI();
+        }
+        function showAdminPanel() {
+            document.getElementById('adminPanel').classList.add('visible');
+            updateAdminUI();
+        }
+        function hideAdminPanel() {
+            document.getElementById('adminPanel').classList.remove('visible');
+        }
+        function adminLogout() {
+            isAdmin = false;
+            document.body.classList.remove('admin-mode');
+            hideAdminPanel();
+            renderChapters();
+        }
+
+        function updateAdminUI() {
+            updateChaptersList();
+            updateChapterSelects();
+            document.getElementById('importExportData').value = JSON.stringify(chapters, null, 2);
+        }
+
+        function updateChaptersList() {
+            const list = document.getElementById('chaptersList-admin');
+            list.innerHTML = chapters.map(ch => `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px; padding: 5px; background: #222; border-radius: 4px;">
+                    <span style="flex: 1; color: #fff;">${ch.name} (${ch.tasks.length})</span>
+                    ${chapters.length > 1 ? 
+                        `<button class="admin-btn-small delete" onclick="deleteChapter('${ch.id}')" style="width: 24px;">×</button>` : 
+                        ''}
+                </div>
+            `).join('');
+        }
+
+        function updateChapterSelects() {
+            const options = chapters.map(ch => `<option value="${ch.id}">${ch.name}</option>`).join('');
+            document.getElementById('taskChapter').innerHTML = options;
+            document.getElementById('bulkChapter').innerHTML = options;
+            document.getElementById('moveChapterSelect').innerHTML = options;
+            document.getElementById('editTaskChapter').innerHTML = options;
+        }
+
+        // ==================== Главы ====================
+        function addChapter() {
+            const name = document.getElementById('newChapterName').value.trim();
+            if (name) {
+                chapters.push({
+                    id: generateId(),
+                    name: name,
+                    collapsed: false,
+                    hidden: false,
+                    tasks: []
+                });
+                document.getElementById('newChapterName').value = '';
+                updateAdminUI();
+                renderChapters();
+            }
+        }
+
+        function deleteChapter(chapterId) {
+            if (chapters.length <= 1) {
+                alert('Нельзя удалить последнюю главу!');
+                return;
+            }
+            chapters = chapters.filter(ch => ch.id !== chapterId);
+            updateAdminUI();
+            renderChapters();
+        }
+
+        function editChapterTitle(chapterId, newTitle) {
+            const chapter = chapters.find(ch => ch.id === chapterId);
+            if (chapter) {
+                chapter.name = newTitle;
+                renderChapters();
+                updateAdminUI();
+            }
+        }
+
+        // ==================== Задачи ====================
+        function adminAddTodo() {
+            const chapterId = document.getElementById('taskChapter').value;
+            const text = document.getElementById('adminNewTodo').value.trim();
+            const count = parseInt(document.getElementById('taskCount').value) || 1;
+            const bpValue = parseInt(document.getElementById('taskBP').value) || 0;
+            if (text && chapterId) {
+                const chapter = chapters.find(ch => ch.id === chapterId);
+                const task = {
+                    id: generateId(),
+                    text: text,
+                    description: '',
+                    bpValue: bpValue,
+                    hidden: false
+                };
+                if (count > 1) {
+                    task.count = count;
+                    task.current = 0;
+                } else {
+                    task.done = false;
+                }
+                chapter.tasks.push(task);
+                document.getElementById('adminNewTodo').value = '';
+                document.getElementById('taskBP').value = '0';
+                renderChapters();
+                updateAdminUI();
+            }
+        }
+
+        function adminAddBulk() {
+            const chapterId = document.getElementById('bulkChapter').value;
+            const text = document.getElementById('bulkTodos').value;
+            const lines = text.split('\n').filter(l => l.trim());
+            const chapter = chapters.find(ch => ch.id === chapterId);
+            lines.forEach(line => {
+                const parts = line.split('|').map(s => s.trim());
+                let taskText = parts[0];
+                let count = 1;
+                let bpValue = 0;
+                if (parts.length >= 2) count = parseInt(parts[1]) || 1;
+                if (parts.length >= 3) bpValue = parseInt(parts[2]) || 0;
+                const task = {
+                    id: generateId(),
+                    text: taskText,
+                    description: '',
+                    bpValue: bpValue,
+                    hidden: false
+                };
+                if (count > 1) {
+                    task.count = count;
+                    task.current = 0;
+                } else {
+                    task.done = false;
+                }
+                chapter.tasks.push(task);
+            });
+            document.getElementById('bulkTodos').value = '';
+            renderChapters();
+            updateAdminUI();
+        }
+
+        function deleteTask(chapterId, taskId) {
+            const chapter = chapters.find(ch => ch.id === chapterId);
+            if (chapter) {
+                chapter.tasks = chapter.tasks.filter(t => t.id !== taskId);
+                renderChapters();
+                updateAdminUI();
+            }
+        }
+
+        function toggleTask(chapterId, taskId) {
+            const chapter = chapters.find(ch => ch.id === chapterId);
+            const task = chapter?.tasks.find(t => t.id === taskId);
+            if (task) {
+                if (task.count) {
+                    // Если задача со счётчиком, галочка завершает всё задание
+                    task.current = task.current < task.count ? task.count : 0;
+                } else {
+                    task.done = !task.done;
+                }
+                renderChapters();
+                updateBPCounter();
+            }
+        }
+
+        function incrementCounter(chapterId, taskId, delta) {
+            const chapter = chapters.find(ch => ch.id === chapterId);
+            const task = chapter?.tasks.find(t => t.id === taskId);
+            if (task && task.count) {
+                let newValue = (task.current || 0) + delta;
+                if (newValue < 0) newValue = 0;
+                if (newValue > task.count) newValue = task.count;
+                task.current = newValue;
+                renderChapters();
+                updateBPCounter();
+            }
+        }
+
+        function toggleDescription(taskId) {
+            const desc = document.getElementById(`desc-${taskId}`);
+            if (desc) desc.classList.toggle('visible');
+        }
+
+        // ==================== Редактирование задачи ====================
+        function openEditTaskModal(chapterId, taskId) {
+            const chapter = chapters.find(ch => ch.id === chapterId);
+            const task = chapter?.tasks.find(t => t.id === taskId);
+            if (task) {
+                currentEditTask = { chapterId, taskId };
+                document.getElementById('editTaskText').value = task.text || '';
+                document.getElementById('editTaskCount').value = task.count || 1;
+                document.getElementById('editTaskBP').value = task.bpValue || 0;
+                document.getElementById('editTaskDescription').value = task.description || '';
+                document.getElementById('editTaskChapter').value = chapterId;
+                document.getElementById('editTaskModal').classList.add('visible');
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('editTaskModal').classList.remove('visible');
+            currentEditTask = null;
+        }
+
+        function saveTaskEdit() {
+            if (!currentEditTask) return;
+            const { chapterId, taskId } = currentEditTask;
+            const oldChapter = chapters.find(ch => ch.id === chapterId);
+            const task = oldChapter?.tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            const newChapterId = document.getElementById('editTaskChapter').value;
+            const newText = document.getElementById('editTaskText').value.trim();
+            const newCount = parseInt(document.getElementById('editTaskCount').value) || 1;
+            const newBP = parseInt(document.getElementById('editTaskBP').value) || 0;
+            const newDescription = document.getElementById('editTaskDescription').value;
+
+            if (!newText) return;
+
+            task.text = newText;
+            task.bpValue = newBP;
+            task.description = newDescription;
+
+            if (newCount > 1) {
+                if (!task.count) {
+                    task.count = newCount;
+                    task.current = task.done ? newCount : 0;
+                    delete task.done;
+                } else {
+                    task.count = newCount;
+                    if (task.current > newCount) task.current = newCount;
+                }
+            } else {
+                if (task.count) {
+                    task.done = task.current >= task.count;
+                    delete task.count;
+                    delete task.current;
+                }
+            }
+
+            if (newChapterId !== chapterId) {
+                const newChapter = chapters.find(ch => ch.id === newChapterId);
+                oldChapter.tasks = oldChapter.tasks.filter(t => t.id !== taskId);
+                newChapter.tasks.push(task);
+            }
+
+            renderChapters();
+            updateAdminUI();
+            closeEditModal();
+        }
+
+        // ==================== Перемещение через меню ====================
+        function openMoveMenu(chapterId, taskId, button) {
+            currentMoveTask = { chapterId, taskId };
+            const menu = document.getElementById('moveMenu');
+            const rect = button.getBoundingClientRect();
+            menu.style.top = rect.bottom + window.scrollY + 'px';
+            menu.style.left = rect.left + 'px';
+            menu.classList.add('visible');
+            updateChapterSelects();
+            setTimeout(() => {
+                document.addEventListener('click', closeMoveMenuOnClickOutside);
+            }, 100);
+        }
+
+        function closeMoveMenuOnClickOutside(e) {
+            const menu = document.getElementById('moveMenu');
+            if (!menu.contains(e.target) && !e.target.classList.contains('move')) {
+                menu.classList.remove('visible');
+                document.removeEventListener('click', closeMoveMenuOnClickOutside);
+            }
+        }
+
+        function moveTask() {
+            if (!currentMoveTask) return;
+            const targetChapterId = document.getElementById('moveChapterSelect').value;
+            const sourceChapter = chapters.find(ch => ch.id === currentMoveTask.chapterId);
+            const targetChapter = chapters.find(ch => ch.id === targetChapterId);
+            const task = sourceChapter?.tasks.find(t => t.id === currentMoveTask.taskId);
+            if (sourceChapter && targetChapter && task && sourceChapter.id !== targetChapter.id) {
+                sourceChapter.tasks = sourceChapter.tasks.filter(t => t.id !== currentMoveTask.taskId);
+                targetChapter.tasks.push(task);
+                renderChapters();
+                updateAdminUI();
+            }
+            document.getElementById('moveMenu').classList.remove('visible');
+        }
+
+        // ==================== Видимость ====================
+        function openVisibilityModal() {
+            renderVisibilityList();
+            document.getElementById('visibilityModal').classList.add('visible');
+        }
+
+        function closeVisibilityModal() {
+            document.getElementById('visibilityModal').classList.remove('visible');
+        }
+
+        function renderVisibilityList() {
+            const list = document.getElementById('visibilityList');
+            list.innerHTML = '';
+            chapters.forEach(chapter => {
+                const chapterItem = document.createElement('div');
+                chapterItem.className = 'visibility-item chapter';
+                chapterItem.innerHTML = `
+                    <span class="item-name">📁 ${chapter.name}</span>
+                    <button class="eye-btn" onclick="toggleChapterVisibility('${chapter.id}')">${chapter.hidden ? '👁️‍🗨️' : '👁️'}</button>
+                `;
+                list.appendChild(chapterItem);
+                chapter.tasks.forEach(task => {
+                    const taskItem = document.createElement('div');
+                    taskItem.className = 'visibility-item';
+                    taskItem.innerHTML = `
+                        <span class="item-name task">↳ ${task.text}</span>
+                        <button class="eye-btn" onclick="toggleTaskVisibility('${chapter.id}', '${task.id}')">${task.hidden ? '👁️‍🗨️' : '👁️'}</button>
+                    `;
+                    list.appendChild(taskItem);
+                });
+            });
+        }
+
+        function toggleChapterVisibility(chapterId) {
+            const chapter = chapters.find(ch => ch.id === chapterId);
+            if (chapter) {
+                chapter.hidden = !chapter.hidden;
+                localStorage.setItem('chapters', JSON.stringify(chapters));
+                renderVisibilityList();
+                renderChapters();
+            }
+        }
+
+        function toggleTaskVisibility(chapterId, taskId) {
+            const chapter = chapters.find(ch => ch.id === chapterId);
+            const task = chapter?.tasks.find(t => t.id === taskId);
+            if (task) {
+                task.hidden = !task.hidden;
+                localStorage.setItem('chapters', JSON.stringify(chapters));
+                renderVisibilityList();
+                renderChapters();
+            }
+        }
+
+        function showAllVisibility() {
+            chapters.forEach(ch => {
+                ch.hidden = false;
+                ch.tasks.forEach(t => t.hidden = false);
+            });
+            localStorage.setItem('chapters', JSON.stringify(chapters));
+            renderVisibilityList();
+            renderChapters();
+        }
+
+        // ==================== Отрисовка ====================
+        function renderChapters() {
+            const container = document.getElementById('chaptersList');
+            container.innerHTML = '';
+
+            chapters.forEach(chapter => {
+                if (chapter.hidden) return;
+
+                const chapterDiv = document.createElement('div');
+                chapterDiv.className = `chapter ${chapter.collapsed ? 'collapsed' : ''}`;
+
+                // Заголовок
+                const header = document.createElement('div');
+                header.className = 'chapter-header';
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'chapter-title';
+                titleSpan.textContent = chapter.name;
+                if (isAdmin) {
+                    titleSpan.ondblclick = () => {
+                        const newTitle = prompt('Введите новое название главы:', chapter.name);
+                        if (newTitle) editChapterTitle(chapter.id, newTitle);
+                    };
+                }
+
+                const visibleTasks = chapter.tasks.filter(t => !t.hidden && filterTask(t));
+                const total = chapter.tasks.filter(t => !t.hidden).length;
+                const completed = chapter.tasks.filter(t => !t.hidden && isTaskDone(t)).length;
+
+                const progress = document.createElement('span');
+                progress.className = 'chapter-progress';
+                progress.textContent = `[${completed}/${total}]`;
+
+                const arrow = document.createElement('span');
+                arrow.className = 'chapter-arrow';
+                arrow.textContent = '▼';
+
+                header.onclick = (e) => {
+                    if (!e.target.classList.contains('chapter-title')) {
+                        chapter.collapsed = !chapter.collapsed;
+                        renderChapters();
+                    }
+                };
+                header.appendChild(titleSpan);
+                header.appendChild(progress);
+                header.appendChild(arrow);
+
+                // Контейнер задач
+                const tasksDiv = document.createElement('div');
+                tasksDiv.className = 'chapter-tasks';
+
+                chapter.tasks.forEach(task => {
+                    if (task.hidden || !filterTask(task)) return;
+
+                    const taskDiv = document.createElement('div');
+                    const taskItem = document.createElement('div');
+                    taskItem.className = `todo-item ${isTaskDone(task) ? 'done' : ''}`;
+
+                    const mainDiv = document.createElement('div');
+                    mainDiv.className = 'todo-main';
+
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'todo-content';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'todo-checkbox';
+                    checkbox.checked = isTaskDone(task);
+                    checkbox.onchange = (e) => {
+                        e.stopPropagation();
+                        toggleTask(chapter.id, task.id);
+                    };
+
+                    const textSpan = document.createElement('span');
+                    textSpan.className = 'todo-text';
+                    textSpan.textContent = task.text;
+                    if (!isAdmin) {
+                        textSpan.onclick = () => toggleDescription(task.id);
+                    }
+
+                    contentDiv.appendChild(checkbox);
+                    contentDiv.appendChild(textSpan);
+
+                    if (task.count) {
+                        const counterContainer = document.createElement('div');
+                        counterContainer.className = 'counter-container';
+                        
+                        const minusBtn = document.createElement('button');
+                        minusBtn.className = 'counter-btn';
+                        minusBtn.innerHTML = '−';
+                        minusBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            incrementCounter(chapter.id, task.id, -1);
+                        };
+                        
+                        const counter = document.createElement('span');
+                        counter.className = 'todo-counter';
+                        counter.innerHTML = `<span class="counter-value">${task.current || 0}</span>/${task.count}`;
+                        
+                        const plusBtn = document.createElement('button');
+                        plusBtn.className = 'counter-btn';
+                        plusBtn.innerHTML = '+';
+                        plusBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            incrementCounter(chapter.id, task.id, 1);
+                        };
+                        
+                        counterContainer.appendChild(minusBtn);
+                        counterContainer.appendChild(counter);
+                        counterContainer.appendChild(plusBtn);
+                        contentDiv.appendChild(counterContainer);
+                    }
+
+                    if (task.bpValue > 0) {
+                        const displayBp = getDisplayBP(task);
+                        const bpSpan = document.createElement('span');
+                        bpSpan.className = 'todo-bp';
+                        bpSpan.textContent = `+${Math.round(displayBp)}`;
+                        contentDiv.appendChild(bpSpan);
+                    }
+
+                    if (isAdmin) {
+                        const controls = document.createElement('div');
+                        controls.className = 'admin-controls';
+                        const editBtn = document.createElement('button');
+                        editBtn.className = 'admin-btn-small edit';
+                        editBtn.innerHTML = '✏️';
+                        editBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            openEditTaskModal(chapter.id, task.id);
+                        };
+                        const moveBtn = document.createElement('button');
+                        moveBtn.className = 'admin-btn-small move';
+                        moveBtn.innerHTML = '↗️';
+                        moveBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            openMoveMenu(chapter.id, task.id, moveBtn);
+                        };
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'admin-btn-small delete';
+                        deleteBtn.innerHTML = '×';
+                        deleteBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            deleteTask(chapter.id, task.id);
+                        };
+                        controls.appendChild(editBtn);
+                        controls.appendChild(moveBtn);
+                        controls.appendChild(deleteBtn);
+                        contentDiv.appendChild(controls);
+                    }
+
+                    mainDiv.appendChild(contentDiv);
+                    taskDiv.appendChild(mainDiv);
+
+                    if (task.description) {
+                        const descDiv = document.createElement('div');
+                        descDiv.id = `desc-${task.id}`;
+                        descDiv.className = 'todo-description';
+                        if (isAdmin) descDiv.classList.add('visible');
+                        descDiv.textContent = task.description;
+                        taskDiv.appendChild(descDiv);
+                    }
+
+                    tasksDiv.appendChild(taskDiv);
+                });
+
+                chapterDiv.appendChild(header);
+                chapterDiv.appendChild(tasksDiv);
+                container.appendChild(chapterDiv);
+            });
+
+            localStorage.setItem('chapters', JSON.stringify(chapters));
+            updateBPCounter();
+        }
+
+        function isTaskDone(task) {
+            return task.count ? (task.current >= task.count) : task.done;
+        }
+
+        // ==================== Админ функции ====================
+        function adminCollapseAllDone() {
+            chapters.forEach(ch => {
+                const allDone = ch.tasks.every(t => isTaskDone(t));
+                if (allDone && ch.tasks.length > 0) ch.collapsed = true;
+            });
+            renderChapters();
+        }
+
+        function adminExpandAll() {
+            chapters.forEach(ch => ch.collapsed = false);
+            renderChapters();
+        }
+
+        function adminDeleteAllDone() {
+            chapters.forEach(ch => {
+                ch.tasks = ch.tasks.filter(t => !isTaskDone(t));
+            });
+            renderChapters();
+            updateAdminUI();
+        }
+
+        function adminClearAll() {
+            if (confirm('Удалить всё?')) {
+                chapters = [{
+                    id: generateId(),
+                    name: 'Основные задачи',
+                    collapsed: false,
+                    hidden: false,
+                    tasks: []
+                }];
+                renderChapters();
+                updateAdminUI();
+            }
+        }
+
+        function adminExport() {
+            const data = document.getElementById('importExportData');
+            data.select();
+            navigator.clipboard.writeText(data.value).then(() => alert('Скопировано!'));
+        }
+
+        function adminImport() {
+            const data = prompt('Вставьте скопированный список:');
+            if (data) {
+                try {
+                    chapters = JSON.parse(data);
+                    chapters.forEach(ch => {
+                        if (ch.hidden === undefined) ch.hidden = false;
+                        ch.tasks.forEach(t => {
+                            if (t.hidden === undefined) t.hidden = false;
+                        });
+                    });
+                    renderChapters();
+                    updateAdminUI();
+                    alert('Импортировано!');
+                } catch (e) {
+                    alert('Ошибка!');
+                }
+            }
+        }
+
+        // Старт
+        renderChapters();
+        // Установить активный фильтр
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === currentFilter);
+        });
+    </script>
+</body>
+</html>
