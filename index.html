@@ -934,7 +934,7 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // ==================== ПОЛНЫЙ СПИСОК ЗАДАЧ ====================
+        // ==================== ПОЛНЫЙ СПИСОК ЗАДАЧ (ВСЕ 60+) ====================
         const DEFAULT_CHAPTERS = [
             {
                 id: "c1",
@@ -942,9 +942,9 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { id: "t1", text: "Поймать нули", done: false, bpValue: 4, hidden: false },
-                    { id: "t2", text: "Мафия", done: false, bpValue: 6, hidden: false },
-                    { id: "t3", text: "Ставка в межсерверном колесе", done: false, bpValue: 6, hidden: false }
+                    { id: "t1", text: "Поймать нули", done: false, bpValue: 2, hidden: false },
+                    { id: "t2", text: "Мафия", done: false, bpValue: 3, hidden: false },
+                    { id: "t3", text: "Ставка в межсерверном колесе", done: false, bpValue: 3, hidden: false }
                 ]
             },
             {
@@ -953,14 +953,14 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { id: "t4", text: "Большой теннис", done: false, bpValue: 2, hidden: false },
-                    { id: "t5", text: "Пинг-понг", done: false, bpValue: 2, hidden: false },
-                    { id: "t6", text: "Волейбол", done: false, bpValue: 2, hidden: false },
-                    { id: "t7", text: "Поймать рыбу", count: 20, current: 0, bpValue: 8, hidden: false },
-                    { id: "t8", text: "Сокровище", done: false, bpValue: 2, hidden: false },
-                    { id: "t9", text: "Футбол", count: 2, current: 0, bpValue: 2, hidden: false },
-                    { id: "t10", text: "Баскетбол", count: 2, current: 0, bpValue: 2, hidden: false },
-                    { id: "t11", text: "Дартс", done: false, bpValue: 2, hidden: false }
+                    { id: "t4", text: "Большой теннис", done: false, bpValue: 1, hidden: false },
+                    { id: "t5", text: "Пинг-понг", done: false, bpValue: 1, hidden: false },
+                    { id: "t6", text: "Волейбол", done: false, bpValue: 1, hidden: false },
+                    { id: "t7", text: "Поймать рыбу", count: 20, current: 0, bpValue: 0, hidden: false },
+                    { id: "t8", text: "Сокровище", done: false, bpValue: 1, hidden: false },
+                    { id: "t9", text: "Футбол", count: 2, current: 0, bpValue: 0, hidden: false },
+                    { id: "t10", text: "Баскетбол", count: 2, current: 0, bpValue: 0, hidden: false },
+                    { id: "t11", text: "Дартс", done: false, bpValue: 1, hidden: false }
                 ]
             },
             {
@@ -969,9 +969,101 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { id: "t12", text: "Стройка", count: 25, current: 0, bpValue: 4, hidden: false },
-                    { id: "t13", text: "Порт", count: 25, current: 0, bpValue: 4, hidden: false },
-                    { id: "t14", text: "Шахта", count: 25, current: 0, bpValue: 4, hidden: false }
+                    { id: "t12", text: "Стройка", count: 25, current: 0, bpValue: 0, hidden: false },
+                    { id: "t13", text: "Порт", count: 25, current: 0, bpValue: 0, hidden: false },
+                    { id: "t14", text: "Шахта", count: 25, current: 0, bpValue: 0, hidden: false },
+                    { id: "t15", text: "Ферма", count: 10, current: 0, bpValue: 0, hidden: false },
+                    { id: "t16", text: "Рейсы на автобусе", count: 2, current: 0, bpValue: 0, hidden: false },
+                    { id: "t17", text: "Пожарный", count: 25, current: 0, bpValue: 0, hidden: false },
+                    { id: "t18", text: "Заказы на дальнобое", count: 3, current: 0, bpValue: 0, hidden: false }
+                ]
+            },
+            {
+                id: "c4",
+                name: "Телефон",
+                collapsed: false,
+                hidden: false,
+                tasks: [
+                    { id: "t19", text: "Лотерея", done: false, bpValue: 1, hidden: false },
+                    { id: "t20", text: "Match", done: false, bpValue: 1, hidden: false },
+                    { id: "t21", text: "Brawl", done: false, bpValue: 1, hidden: false },
+                    { id: "t22", text: "Сайт", done: false, bpValue: 1, hidden: false }
+                ]
+            },
+            {
+                id: "c5",
+                name: "Парные ВР",
+                collapsed: false,
+                hidden: false,
+                tasks: [
+                    { id: "t23", text: "Картинг", done: false, bpValue: 1, hidden: false },
+                    { id: "t24", text: "ТК", count: 5, current: 0, bpValue: 1, hidden: false },
+                    { id: "t25", text: "Арена", count: 3, current: 0, bpValue: 1, hidden: false },
+                    { id: "t26", text: "Гонка", done: false, bpValue: 1, hidden: false },
+                    { id: "t27", text: "Армреслинг", done: false, bpValue: 1, hidden: false },
+                    { id: "t28", text: "Dance-battle", count: 3, current: 0, bpValue: 2, hidden: false }
+                ]
+            },
+            {
+                id: "c6",
+                name: "Дель-Пьеро",
+                collapsed: false,
+                hidden: false,
+                tasks: [
+                    { id: "t29", text: "Аренда киностудии", done: false, bpValue: 2, hidden: false },
+                    { id: "t30", text: "Тир", done: false, bpValue: 1, hidden: false },
+                    { id: "t31", text: "Кинотеатр", count: 5, current: 0, bpValue: 5, hidden: false },
+                    { id: "t32", text: "Лизинг", done: false, bpValue: 1, hidden: false }
+                ]
+            },
+            {
+                id: "c7",
+                name: "Питомец",
+                collapsed: false,
+                hidden: false,
+                tasks: [
+                    { id: "t33", text: "Книгуть мячик", count: 15, current: 0, bpValue: 2, hidden: false },
+                    { id: "t34", text: "Команды", count: 15, current: 0, bpValue: 2, hidden: false }
+                ]
+            },
+            {
+                id: "c8",
+                name: "Долгие-затратные",
+                collapsed: false,
+                hidden: false,
+                tasks: [
+                    { id: "t35", text: "За час онлайн", count: 8, current: 0, bpValue: 2, hidden: false },
+                    { id: "t36", text: "Тренажерный зал", count: 20, current: 0, bpValue: 1, hidden: false },
+                    { id: "t37", text: "Посылки", count: 10, current: 0, bpValue: 1, hidden: false },
+                    { id: "t38", text: "Смена внешности", count: 12, current: 0, bpValue: 2, hidden: false },
+                    { id: "t39", text: "Метро", done: false, bpValue: 2, hidden: false },
+                    { id: "t40", text: "Кейс за DP", done: false, bpValue: 10, hidden: false },
+                    { id: "t41", text: "Задания клуба", count: 2, current: 0, bpValue: 4, hidden: false },
+                    { id: "t42", text: "Охота", count: 5, current: 0, bpValue: 10, hidden: false },
+                    { id: "t43", text: "Автосервис", done: false, bpValue: 1, hidden: false },
+                    { id: "t44", text: "Обезбор/Травка", done: false, bpValue: 4, hidden: false },
+                    { id: "t45", text: "Airdrop", count: 2, current: 0, bpValue: 8, hidden: false },
+                    { id: "t46", text: "Чужое авто в автосервисе", done: false, bpValue: 2, hidden: false },
+                    { id: "t47", text: "Материалы", done: false, bpValue: 1, hidden: false }
+                ]
+            },
+            {
+                id: "c9",
+                name: "Фракционные",
+                collapsed: false,
+                hidden: false,
+                tasks: [
+                    { id: "t48", text: "Граффити", count: 1, current: 0, bpValue: 1, hidden: false },
+                    { id: "t49", text: "Контрабанда", count: 5, current: 0, bpValue: 2, hidden: false },
+                    { id: "t50", text: "Бизвар/Капт", count: 5, current: 0, bpValue: 1, hidden: false },
+                    { id: "t51", text: "Мед карты", count: 5, current: 0, bpValue: 2, hidden: false },
+                    { id: "t52", text: "Вызовы", count: 15, current: 0, bpValue: 2, hidden: false },
+                    { id: "t53", text: "Объявления", count: 40, current: 0, bpValue: 2, hidden: false },
+                    { id: "t54", text: "Дома/угонки", count: 15, current: 0, bpValue: 2, hidden: false },
+                    { id: "t55", text: "Коды", count: 5, current: 0, bpValue: 2, hidden: false },
+                    { id: "t56", text: "Авто на учет", count: 2, current: 0, bpValue: 1, hidden: false },
+                    { id: "t57", text: "Арест", done: false, bpValue: 1, hidden: false },
+                    { id: "t58", text: "Выкуп из КПЗ", count: 2, current: 0, bpValue: 2, hidden: false }
                 ]
             }
         ];
