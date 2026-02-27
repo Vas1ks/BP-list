@@ -1860,7 +1860,10 @@
             const chapter = chapters.find(ch => ch.id === chapterId);
             const task = chapter?.tasks.find(t => t.id === taskId);
             if (task) {
-                if (!task.count) {
+                if (task.count) {
+                    // Галочка заполняет счетчик полностью
+                    task.current = (task.current >= task.count) ? 0 : task.count;
+                } else {
                     task.done = !task.done;
                 }
                 renderChapters();
@@ -2109,15 +2112,10 @@
                     checkbox.className = 'todo-checkbox';
                     checkbox.checked = task.count ? task.current >= task.count : task.done;
                     
-                    if (task.count) {
-                        checkbox.disabled = true;
-                        checkbox.style.opacity = '0.5';
-                    } else {
-                        checkbox.onchange = (e) => {
-                            e.stopPropagation();
-                            toggleTask(chapter.id, task.id);
-                        };
-                    }
+                    checkbox.onchange = (e) => {
+                        e.stopPropagation();
+                        toggleTask(chapter.id, task.id);
+                    };
 
                     const textSpan = document.createElement('span');
                     textSpan.className = 'todo-text';
@@ -2159,8 +2157,8 @@
                         contentDiv.appendChild(counterDiv);
                     }
 
-                    const isTaskCompleted = task.count ? task.current >= task.count : task.done;
-                    if (task.bpValue > 0 && isTaskCompleted) {
+                    // Всегда показываем BP справа
+                    if (task.bpValue > 0) {
                         let displayBp = task.bpValue;
                         let multiplier = 1;
                         if (x2Active) multiplier *= 2;
