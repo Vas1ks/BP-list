@@ -980,7 +980,7 @@
 
     <script>
         // ==================== Пароль админа ====================
-        const ADMIN_PASSWORD = "314159"; // Просто пароль, без хеширования
+        const ADMIN_PASSWORD = "314159";
 
         // ==================== ПОЛНЫЙ СПИСОК ЗАДАЧ ====================
         const DEFAULT_CHAPTERS = [
@@ -2198,7 +2198,7 @@
                         mainDiv.appendChild(counterDiv);
                     }
 
-                    // BP
+                    // BP — показываем всегда, с учётом бонусов
                     if (task.bpValue > 0) {
                         let displayBp = task.bpValue;
                         let multiplier = 1;
@@ -2282,7 +2282,6 @@
                     ghostClass: 'todo-item-ghost',
                     dragClass: 'todo-item-drag',
                     onEnd: function() {
-                        // Сохраняем порядок задач после перетаскивания
                         saveToStorage();
                     }
                 });
