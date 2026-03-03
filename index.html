@@ -1340,7 +1340,8 @@
                         count: 8, 
                         current: 0, 
                         bpValue: 2, 
-                        description: "За каждые 3 часа онлайн",
+                        isAccumulative: true, // специальный флаг для накопительной задачи
+                        description: "Каждые 3 часа онлайн +2 BP",
                         hidden: false 
                     },
                     { 
@@ -1590,7 +1591,19 @@
                 if (chapter.hidden) return;
                 chapter.tasks.forEach(task => {
                     if (task.hidden) return;
-                    if (task.count) {
+                    
+                    // Для накопительной задачи (3 часа онлайн)
+                    if (task.isAccumulative && task.count) {
+                        if (task.current > 0 && task.bpValue) {
+                            let bp = task.current * task.bpValue;
+                            let multiplier = 1;
+                            if (x2Active) multiplier *= 2;
+                            if (vipActive) multiplier *= 2;
+                            total += bp * multiplier;
+                        }
+                    }
+                    // Для обычных задач со счетчиком
+                    else if (task.count) {
                         if (task.current >= task.count && task.bpValue) {
                             let bp = task.bpValue;
                             let multiplier = 1;
@@ -1598,7 +1611,9 @@
                             if (vipActive) multiplier *= 2;
                             total += bp * multiplier;
                         }
-                    } else {
+                    }
+                    // Для обычных задач без счетчика
+                    else {
                         if (task.done && task.bpValue) {
                             let bp = task.bpValue;
                             let multiplier = 1;
@@ -2198,18 +2213,34 @@
                         mainDiv.appendChild(counterDiv);
                     }
 
-                    // BP — показываем всегда, с учётом бонусов
+                    // BP — показываем с учётом типа задачи
                     if (task.bpValue > 0) {
                         let displayBp = task.bpValue;
+                        
+                        // Для накопительной задачи (3 часа онлайн)
+                        if (task.isAccumulative && task.count && task.current > 0) {
+                            displayBp = task.current * task.bpValue;
+                        }
+                        // Для обычных задач со счетчиком показываем BP только при выполнении
+                        else if (task.count && !task.isAccumulative) {
+                            if (task.current >= task.count) {
+                                displayBp = task.bpValue;
+                            } else {
+                                displayBp = 0;
+                            }
+                        }
+                        
                         let multiplier = 1;
                         if (x2Active) multiplier *= 2;
                         if (vipActive) multiplier *= 2;
                         displayBp *= multiplier;
                         
-                        const bpSpan = document.createElement('span');
-                        bpSpan.className = 'todo-bp';
-                        bpSpan.textContent = `+${displayBp}`;
-                        mainDiv.appendChild(bpSpan);
+                        if (displayBp > 0) {
+                            const bpSpan = document.createElement('span');
+                            bpSpan.className = 'todo-bp';
+                            bpSpan.textContent = `+${displayBp}`;
+                            mainDiv.appendChild(bpSpan);
+                        }
                     }
 
                     // Кнопки админа
