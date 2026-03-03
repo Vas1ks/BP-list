@@ -251,7 +251,7 @@
             transition: opacity 0.3s;
         }
 
-        /* --- УЛУЧШЕННОЕ ВЫРАВНИВАНИЕ ЗАДАЧ --- */
+        /* --- ИДЕАЛЬНОЕ ВЫРАВНИВАНИЕ --- */
         .todo-item {
             display: flex;
             flex-direction: column;
@@ -272,10 +272,9 @@
             box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
         }
 
-        /* Основная строка задачи — используем сетку */
+        /* Основная строка задачи — используем flex для идеального выравнивания */
         .todo-main {
-            display: grid;
-            grid-template-columns: auto 1fr auto auto auto;
+            display: flex;
             align-items: center;
             gap: 12px;
             width: 100%;
@@ -288,7 +287,7 @@
             cursor: pointer;
             accent-color: #4CAF50;
             transition: transform 0.2s;
-            grid-column: 1;
+            flex-shrink: 0;
         }
         .todo-checkbox:hover {
             transform: scale(1.1);
@@ -301,9 +300,9 @@
             cursor: pointer;
             color: var(--text-color);
             transition: background-color 0.2s;
-            grid-column: 2;
             white-space: normal;
             word-break: break-word;
+            flex: 1;
         }
         .todo-text:hover {
             background-color: var(--todo-hover);
@@ -321,9 +320,9 @@
             background-color: var(--counter-bg);
             padding: 4px 8px;
             border-radius: 20px;
-            grid-column: 3;
-            justify-self: end;
             min-width: 110px;
+            justify-content: center;
+            flex-shrink: 0;
         }
         .counter-value {
             font-weight: bold;
@@ -346,6 +345,7 @@
             justify-content: center;
             border-radius: 50%;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
         .counter-btn:hover {
             background-color: rgba(76, 175, 80, 0.3);
@@ -366,10 +366,10 @@
             padding: 4px 10px;
             border-radius: 20px;
             font-weight: bold;
-            grid-column: 4;
-            justify-self: end;
             min-width: 60px;
             text-align: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
         .todo-bp::before {
             content: "💰";
@@ -381,8 +381,7 @@
         .admin-controls {
             display: flex;
             gap: 5px;
-            grid-column: 5;
-            justify-self: end;
+            flex-shrink: 0;
         }
         .admin-btn-small {
             width: 24px;
@@ -396,6 +395,7 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
         .admin-btn-small.add {
             background-color: #4CAF50;
@@ -444,7 +444,6 @@
             border-left: 3px solid #2196F3;
             display: none;
             animation: fadeIn 0.3s;
-            grid-column: 1 / -1;
         }
         .todo-description.visible {
             display: block;
@@ -457,23 +456,16 @@
         /* Адаптация для мобильных */
         @media (max-width: 500px) {
             .todo-main {
-                grid-template-columns: auto 1fr;
-                gap: 8px;
+                flex-wrap: wrap;
             }
             .todo-counter {
-                grid-column: 1 / -1;
-                justify-self: start;
-                margin-left: 26px;
+                margin-left: 30px;
             }
             .todo-bp {
-                grid-column: 1 / -1;
-                justify-self: start;
-                margin-left: 26px;
+                margin-left: 30px;
             }
             .admin-controls {
-                grid-column: 1 / -1;
-                justify-self: start;
-                margin-left: 26px;
+                margin-left: 30px;
             }
         }
 
@@ -1340,7 +1332,7 @@
                         count: 8, 
                         current: 0, 
                         bpValue: 2, 
-                        isAccumulative: true, // специальный флаг для накопительной задачи
+                        isAccumulative: true,
                         description: "Каждые 3 часа онлайн +2 BP",
                         hidden: false 
                     },
@@ -2213,21 +2205,13 @@
                         mainDiv.appendChild(counterDiv);
                     }
 
-                    // BP — показываем с учётом типа задачи
+                    // BP — всегда показываем потенциальную награду
                     if (task.bpValue > 0) {
                         let displayBp = task.bpValue;
                         
-                        // Для накопительной задачи (3 часа онлайн)
+                        // Для накопительной задачи (3 часа онлайн) показываем текущую сумму
                         if (task.isAccumulative && task.count && task.current > 0) {
                             displayBp = task.current * task.bpValue;
-                        }
-                        // Для обычных задач со счетчиком показываем BP только при выполнении
-                        else if (task.count && !task.isAccumulative) {
-                            if (task.current >= task.count) {
-                                displayBp = task.bpValue;
-                            } else {
-                                displayBp = 0;
-                            }
                         }
                         
                         let multiplier = 1;
@@ -2235,12 +2219,10 @@
                         if (vipActive) multiplier *= 2;
                         displayBp *= multiplier;
                         
-                        if (displayBp > 0) {
-                            const bpSpan = document.createElement('span');
-                            bpSpan.className = 'todo-bp';
-                            bpSpan.textContent = `+${displayBp}`;
-                            mainDiv.appendChild(bpSpan);
-                        }
+                        const bpSpan = document.createElement('span');
+                        bpSpan.className = 'todo-bp';
+                        bpSpan.textContent = `+${displayBp}`;
+                        mainDiv.appendChild(bpSpan);
                     }
 
                     // Кнопки админа
