@@ -6,7 +6,7 @@
     <!-- SortableJS для drag & drop -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
-        /* CSS переменные для тем */
+        /* --- Стили без изменений (такие же, как в предыдущем ответе) --- */
         :root {
             --bg-color: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             --container-bg: rgba(30, 30, 30, 0.95);
@@ -272,7 +272,6 @@
             box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
         }
 
-        /* Основная строка задачи — используем flex для идеального выравнивания */
         .todo-main {
             display: flex;
             align-items: center;
@@ -280,7 +279,6 @@
             width: 100%;
         }
 
-        /* Чекбокс фиксированной ширины */
         .todo-checkbox {
             width: 18px;
             height: 18px;
@@ -293,7 +291,6 @@
             transform: scale(1.1);
         }
 
-        /* Текст задачи — занимает всё доступное место */
         .todo-text {
             padding: 5px;
             border-radius: 4px;
@@ -312,7 +309,6 @@
             color: #aaa;
         }
 
-        /* Счетчик с кнопками — фиксированная ширина */
         .todo-counter {
             display: flex;
             align-items: center;
@@ -355,7 +351,6 @@
             background-color: rgba(255, 68, 68, 0.3);
         }
 
-        /* BP справа — фиксированная ширина */
         .todo-bp {
             display: flex;
             align-items: center;
@@ -377,7 +372,6 @@
             margin-right: 2px;
         }
 
-        /* Кнопки админа — фиксированная ширина */
         .admin-controls {
             display: flex;
             gap: 5px;
@@ -432,12 +426,11 @@
             transform: scale(1.1);
         }
 
-        /* Описание задачи */
         .todo-description {
             font-size: 12px;
             color: #ccc;
             margin-top: 8px;
-            margin-left: 30px; /* Отступ под чекбокс */
+            margin-left: 30px;
             padding: 8px 12px;
             background-color: var(--desc-bg);
             border-radius: 4px;
@@ -453,7 +446,6 @@
             to { opacity: 1; }
         }
 
-        /* Адаптация для мобильных */
         @media (max-width: 500px) {
             .todo-main {
                 flex-wrap: wrap;
@@ -474,7 +466,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Модальное окно */
         .modal {
             position: fixed;
             top: 50%;
@@ -556,7 +547,6 @@
             background-color: #666;
         }
 
-        /* Меню переноса */
         .move-menu {
             position: absolute;
             background-color: var(--modal-bg);
@@ -590,7 +580,6 @@
             cursor: pointer;
         }
 
-        /* Панель видимости (список глаз) */
         .visibility-list {
             max-height: 400px;
             overflow-y: auto;
@@ -626,7 +615,6 @@
             transform: scale(1.2);
         }
 
-        /* Футер */
         .footer {
             position: fixed;
             bottom: 20px;
@@ -719,7 +707,6 @@
             font-weight: bold;
         }
 
-        /* Админ-панель */
         .admin-panel {
             max-width: 600px;
             margin: 20px auto;
@@ -792,7 +779,6 @@
             color: #333;
         }
 
-        /* Пароль */
         .password-modal {
             position: fixed;
             top: 50%;
@@ -1584,7 +1570,6 @@
                 chapter.tasks.forEach(task => {
                     if (task.hidden) return;
                     
-                    // Для накопительной задачи (3 часа онлайн)
                     if (task.isAccumulative && task.count) {
                         if (task.current > 0 && task.bpValue) {
                             let bp = task.current * task.bpValue;
@@ -1594,7 +1579,6 @@
                             total += bp * multiplier;
                         }
                     }
-                    // Для обычных задач со счетчиком
                     else if (task.count) {
                         if (task.current >= task.count && task.bpValue) {
                             let bp = task.bpValue;
@@ -1604,7 +1588,6 @@
                             total += bp * multiplier;
                         }
                     }
-                    // Для обычных задач без счетчика
                     else {
                         if (task.done && task.bpValue) {
                             let bp = task.bpValue;
@@ -1695,12 +1678,11 @@
 
         function hardRestartTasks() {
             if (confirm('ПОЛНЫЙ СБРОС: Вернуть всё к состоянию по умолчанию?')) {
-                localStorage.removeItem('chapters');
-                chapters = JSON.parse(JSON.stringify(DEFAULT_CHAPTERS));
+                localStorage.removeItem('chapters'); // Удаляем сохранённые данные
+                chapters = JSON.parse(JSON.stringify(DEFAULT_CHAPTERS)); // Глубокая копия шаблона
                 renderChapters();
                 updateAdminUI();
-                saveToStorage();
-                alert('Готово! Начальный список восстановлен.');
+                alert('Готово! Начальный список восстановлен (все скрытые задания возвращены).');
             }
         }
 
@@ -2153,7 +2135,6 @@
                     const mainDiv = document.createElement('div');
                     mainDiv.className = 'todo-main';
 
-                    // Чекбокс
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.className = 'todo-checkbox';
@@ -2163,7 +2144,6 @@
                         toggleTask(chapter.id, task.id);
                     };
 
-                    // Текст
                     const textSpan = document.createElement('span');
                     textSpan.className = 'todo-text';
                     textSpan.textContent = task.text;
@@ -2174,7 +2154,6 @@
                     mainDiv.appendChild(checkbox);
                     mainDiv.appendChild(textSpan);
 
-                    // Счетчик (если есть)
                     if (task.count) {
                         const counterDiv = document.createElement('div');
                         counterDiv.className = 'todo-counter';
@@ -2205,11 +2184,9 @@
                         mainDiv.appendChild(counterDiv);
                     }
 
-                    // BP — всегда показываем потенциальную награду
                     if (task.bpValue > 0) {
                         let displayBp = task.bpValue;
                         
-                        // Для накопительной задачи (3 часа онлайн) показываем текущую сумму
                         if (task.isAccumulative && task.count && task.current > 0) {
                             displayBp = task.current * task.bpValue;
                         }
@@ -2225,7 +2202,6 @@
                         mainDiv.appendChild(bpSpan);
                     }
 
-                    // Кнопки админа
                     if (isAdmin) {
                         const controls = document.createElement('div');
                         controls.className = 'admin-controls';
@@ -2262,7 +2238,6 @@
 
                     taskDiv.appendChild(mainDiv);
 
-                    // Описание
                     if (task.description) {
                         const descDiv = document.createElement('div');
                         descDiv.id = `desc-${task.id}`;
