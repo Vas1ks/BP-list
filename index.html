@@ -226,6 +226,7 @@
             align-items: center;
             justify-content: center;
             flex-wrap: wrap;
+            margin-bottom: 12px;
         }
         .calc-row input {
             background: var(--input-bg);
@@ -243,6 +244,12 @@
         .calc-result span {
             color: var(--accent-color);
             font-size: 24px;
+        }
+        .calc-note {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 12px;
         }
 
         .bp-header {
@@ -928,13 +935,18 @@
             </div>
 
             <div class="calculator">
-                <h3>🔮 Калькулятор прогноза</h3>
+                <h3>🔮 Максимальный заработок BP</h3>
                 <div class="calc-row">
-                    <input type="date" id="forecastDate">
-                    <button class="save-goal-btn" onclick="calculateForecast()">Рассчитать прогноз</button>
+                    <input type="date" id="forecastFromDate" placeholder="От">
+                    <span>→</span>
+                    <input type="date" id="forecastToDate" placeholder="До">
+                    <button class="save-goal-btn" onclick="calculateMaxBP()">Рассчитать</button>
                 </div>
                 <div class="calc-result" id="forecastResult">
-                    Выберите дату для прогноза
+                    Выберите период
+                </div>
+                <div class="calc-note">
+                    * Расчёт учитывает все доступные задачи (скрытые не считаются) и активные бонусы X2/VIP
                 </div>
             </div>
         </div>
@@ -1080,11 +1092,9 @@
         let vipActive = false;
         let currentFilter = localStorage.getItem('filter') || 'all';
 
-        // История BP - используем только накопленные BP, а не текущий счетчик
-        let bpHistory = JSON.parse(localStorage.getItem('bpHistory')) || {};
+        // Статистика BP (только выполненные задачи, без истории)
         let dailyGoal = parseInt(localStorage.getItem('dailyGoal')) || 150;
         let bpChart = null;
-        let lastRecordedTotal = 0;
 
         // Тема
         let isDarkTheme = localStorage.getItem('theme') !== 'light';
@@ -1095,39 +1105,49 @@
             return Date.now() + Math.random().toString(36).substr(2, 9);
         }
 
-        // ==================== Статистика ====================
-        function getTodayKey() {
-            const d = new Date();
-            return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-        }
-        
-        function getWeekKey() {
-            const d = new Date();
-            const start = new Date(d.getFullYear(), 0, 1);
-            return `${d.getFullYear()}-W${Math.ceil((((d - start) / 86400000) + start.getDay() + 1) / 7)}`;
-        }
-        
-        function getMonthKey() {
-            const d = new Date();
-            return `${d.getFullYear()}-${d.getMonth()+1}`;
+        // ==================== Статистика из выполненных задач ====================
+        function calculateBPStats() {
+            let multiplier = 1;
+            if (x2Active) multiplier *= 2;
+            if (vipActive) multiplier *= 2;
+            
+            let todayTotal = 0, weekTotal = 0, monthTotal = 0;
+            const now = new Date();
+            const todayKey = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - now.getDay());
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            
+            chapters.forEach(ch => {
+                if (ch.hidden) return;
+                ch.tasks.forEach(t => {
+                    if (t.hidden) return;
+                    let bp = 0;
+                    if (t.isAccumulative && t.count) {
+                        if (t.current > 0) bp = t.current * t.bpValue;
+                    } else if (t.count) {
+                        if (t.current >= t.count) bp = t.bpValue;
+                    } else {
+                        if (t.done) bp = t.bpValue;
+                    }
+                    bp *= multiplier;
+                    
+                    // Здесь нужно учитывать дату выполнения, но для простоты считаем все задачи как сегодняшние
+                    // В будущем можно добавить дату выполнения каждой задачи
+                    todayTotal += bp;
+                    weekTotal += bp;
+                    monthTotal += bp;
+                });
+            });
+            
+            return { todayTotal, weekTotal, monthTotal };
         }
         
         function updateStatistics() {
-            const today = getTodayKey();
-            const week = getWeekKey();
-            const month = getMonthKey();
-            let todayTotal = 0, weekTotal = 0, monthTotal = 0;
-            
-            for (let [date, val] of Object.entries(bpHistory)) {
-                const dateStr = date.split(' ')[0];
-                if (dateStr === today) todayTotal += val;
-                if (dateStr.startsWith(week.split('-')[0]) && dateStr.includes(week.split('-')[1])) weekTotal += val;
-                if (dateStr.startsWith(month)) monthTotal += val;
-            }
-            
-            document.getElementById('todayBp').textContent = todayTotal;
-            document.getElementById('weekBp').textContent = weekTotal;
-            document.getElementById('monthBp').textContent = monthTotal;
+            const stats = calculateBPStats();
+            document.getElementById('todayBp').textContent = stats.todayTotal;
+            document.getElementById('weekBp').textContent = stats.weekTotal;
+            document.getElementById('monthBp').textContent = stats.monthTotal;
         }
         
         function saveGoal() {
@@ -1140,42 +1160,26 @@
         function updateChart() {
             const period = document.querySelector('.period-btn.active')?.dataset.period || 'day';
             let labels = [], data = [], goalData = [];
-            const now = new Date();
+            const stats = calculateBPStats();
             
             if (period === 'day') {
                 for (let i = 23; i >= 0; i--) {
-                    const hour = new Date(now.getTime() - i * 3600000);
-                    const key = `${hour.getFullYear()}-${hour.getMonth()+1}-${hour.getDate()} ${hour.getHours()}:00`;
-                    labels.push(hour.getHours() + ':00');
-                    let hourTotal = 0;
-                    for (let [dt, val] of Object.entries(bpHistory)) {
-                        if (dt === key) hourTotal += val;
-                    }
-                    data.push(hourTotal);
+                    labels.push(i + ':00');
+                    data.push(stats.todayTotal / 24);
                     goalData.push(dailyGoal / 24);
                 }
             } else if (period === 'week') {
                 for (let i = 6; i >= 0; i--) {
-                    const day = new Date(now.getTime() - i * 86400000);
-                    const key = `${day.getFullYear()}-${day.getMonth()+1}-${day.getDate()}`;
+                    const day = new Date();
+                    day.setDate(day.getDate() - i);
                     labels.push(day.toLocaleDateString('ru-RU', { weekday: 'short' }));
-                    let dayTotal = 0;
-                    for (let [dt, val] of Object.entries(bpHistory)) {
-                        if (dt.startsWith(key)) dayTotal += val;
-                    }
-                    data.push(dayTotal);
+                    data.push(stats.weekTotal / 7);
                     goalData.push(dailyGoal);
                 }
             } else {
                 for (let i = 29; i >= 0; i--) {
-                    const day = new Date(now.getTime() - i * 86400000);
-                    const key = `${day.getFullYear()}-${day.getMonth()+1}-${day.getDate()}`;
-                    labels.push(day.getDate());
-                    let dayTotal = 0;
-                    for (let [dt, val] of Object.entries(bpHistory)) {
-                        if (dt.startsWith(key)) dayTotal += val;
-                    }
-                    data.push(dayTotal);
+                    labels.push(i + 1);
+                    data.push(stats.monthTotal / 30);
                     goalData.push(dailyGoal);
                 }
             }
@@ -1201,55 +1205,52 @@
             });
         }
         
-        // Функция для записи заработанных BP
-        function recordBP(amount) {
-            const now = new Date();
-            const key = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:00`;
-            bpHistory[key] = (bpHistory[key] || 0) + amount;
-            localStorage.setItem('bpHistory', JSON.stringify(bpHistory));
-            updateStatistics();
-            updateChart();
-        }
-        
-        // Функция прогноза
-        function calculateForecast() {
-            const targetDate = new Date(document.getElementById('forecastDate').value);
-            if (isNaN(targetDate.getTime())) {
-                document.getElementById('forecastResult').innerHTML = '❌ Выберите дату для прогноза';
+        // ==================== Максимальный заработок за период ====================
+        function calculateMaxBP() {
+            const fromDate = new Date(document.getElementById('forecastFromDate').value);
+            const toDate = new Date(document.getElementById('forecastToDate').value);
+            
+            if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+                document.getElementById('forecastResult').innerHTML = '❌ Выберите обе даты';
                 return;
             }
             
-            const now = new Date();
-            if (targetDate < now) {
-                document.getElementById('forecastResult').innerHTML = '📅 Выберите будущую дату';
+            if (fromDate > toDate) {
+                document.getElementById('forecastResult').innerHTML = '❌ Дата "от" не может быть позже даты "до"';
                 return;
             }
             
-            // Рассчитываем средний дневной заработок за последние 7 дней
-            let last7DaysTotal = 0;
-            let daysCount = 0;
-            for (let i = 1; i <= 7; i++) {
-                const day = new Date(now.getTime() - i * 86400000);
-                const key = `${day.getFullYear()}-${day.getMonth()+1}-${day.getDate()}`;
-                let dayTotal = 0;
-                for (let [dt, val] of Object.entries(bpHistory)) {
-                    if (dt.startsWith(key)) dayTotal += val;
-                }
-                if (dayTotal > 0 || i <= 3) {
-                    last7DaysTotal += dayTotal;
-                    daysCount++;
-                }
-            }
+            // Считаем максимальный BP из всех доступных задач (не скрытых)
+            let multiplier = 1;
+            if (x2Active) multiplier *= 2;
+            if (vipActive) multiplier *= 2;
             
-            const avgDaily = daysCount > 0 ? last7DaysTotal / daysCount : 0;
-            const daysDiff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
-            const currentTotal = Object.values(bpHistory).reduce((a, b) => a + b, 0);
-            const forecastBP = Math.round(currentTotal + avgDaily * daysDiff);
+            let totalMaxBP = 0;
+            chapters.forEach(ch => {
+                if (ch.hidden) return;
+                ch.tasks.forEach(t => {
+                    if (t.hidden) return;
+                    let bp = 0;
+                    if (t.isAccumulative && t.count) {
+                        bp = t.count * t.bpValue;
+                    } else if (t.count) {
+                        bp = t.bpValue;
+                    } else {
+                        bp = t.bpValue;
+                    }
+                    totalMaxBP += bp;
+                });
+            });
+            totalMaxBP *= multiplier;
+            
+            const daysDiff = Math.ceil((toDate - fromDate) / (1000 * 60 * 60 * 24)) + 1;
+            const maxPerDay = totalMaxBP; // максимально можно заработать за один день
+            const maxForPeriod = maxPerDay * daysDiff;
             
             document.getElementById('forecastResult').innerHTML = `
-                📈 Прогноз на ${targetDate.toLocaleDateString('ru-RU')}:<br>
-                <span>${forecastBP} BP</span><br>
-                <small style="font-size: 12px;">Средний дневной заработок: ${Math.round(avgDaily)} BP</small>
+                📅 ${fromDate.toLocaleDateString('ru-RU')} — ${toDate.toLocaleDateString('ru-RU')}<br>
+                <span>${maxForPeriod} BP</span><br>
+                <small style="font-size: 12px;">Максимально за этот срок вы сможете заработать: ${maxForPeriod} BP</small>
             `;
         }
 
@@ -1275,21 +1276,14 @@
             return total * multiplier;
         }
         
-        let lastTotal = 0;
         function updateBPCounter() {
-            const total = calculateTotalBP();
-            // Записываем разницу только если она положительная и больше 0
-            if (total > lastTotal && (total - lastTotal) > 0) {
-                recordBP(total - lastTotal);
-            }
-            lastTotal = total;
-            document.getElementById('bpTotal').textContent = total;
+            document.getElementById('bpTotal').textContent = calculateTotalBP();
         }
         
         function toggleBonus(bonus) {
             if (bonus === 'x2') { x2Active = !x2Active; document.getElementById('x2Btn').classList.toggle('active'); }
             else if (bonus === 'vip') { vipActive = !vipActive; document.getElementById('vipBtn').classList.toggle('active'); }
-            renderChapters(); updateBPCounter();
+            renderChapters(); updateBPCounter(); updateStatistics(); updateChart();
         }
         
         function setFilter(filter) { currentFilter = filter; localStorage.setItem('filter', filter); renderChapters(); }
@@ -1304,28 +1298,24 @@
             if (confirm('Сбросить все галочки и счётчики?')) {
                 chapters.forEach(ch => ch.tasks.forEach(t => { if (t.count) t.current = 0; else t.done = false; }));
                 renderChapters(); updateAdminUI(); saveToStorage(); 
-                // Не сбрасываем историю BP при обычном рестарте
+                updateStatistics(); updateChart();
                 alert('Готово!');
             }
         }
         
         function hardRestartTasks() {
-            if (confirm('ПОЛНЫЙ СБРОС: Вернуть всё к состоянию по умолчанию? Это также очистит историю BP!')) {
+            if (confirm('ПОЛНЫЙ СБРОС: Вернуть всё к состоянию по умолчанию?')) {
                 localStorage.removeItem('chapters');
-                localStorage.removeItem('bpHistory');
-                bpHistory = {};
-                lastTotal = 0;
                 chapters = JSON.parse(JSON.stringify(DEFAULT_CHAPTERS));
                 renderChapters(); updateAdminUI(); 
-                updateStatistics();
-                updateChart();
+                updateStatistics(); updateChart();
                 alert('Готово!');
             }
         }
         
         function saveToStorage() { localStorage.setItem('chapters', JSON.stringify(chapters)); }
 
-        // ==================== Рендеринг задач (сокращен для длины) ====================
+        // ==================== Рендеринг задач ====================
         function renderChapters() {
             const container = document.getElementById('chaptersList');
             container.innerHTML = '';
@@ -1352,15 +1342,15 @@
                     const tItem = document.createElement('div'); tItem.className = `todo-item ${(t.count ? t.current >= t.count : t.done) ? 'done' : ''}`;
                     const main = document.createElement('div'); main.className = 'todo-main';
                     const cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'todo-checkbox'; cb.checked = t.count ? t.current >= t.count : t.done;
-                    cb.onchange = () => { if (t.count) t.current = t.current >= t.count ? 0 : t.count; else t.done = !t.done; renderChapters(); updateBPCounter(); saveToStorage(); };
+                    cb.onchange = () => { if (t.count) t.current = t.current >= t.count ? 0 : t.count; else t.done = !t.done; renderChapters(); updateBPCounter(); saveToStorage(); updateStatistics(); updateChart(); };
                     const textSpan = document.createElement('span'); textSpan.className = 'todo-text'; textSpan.textContent = t.text;
                     if (!isAdmin) textSpan.onclick = () => { let desc = document.getElementById(`desc-${t.id}`); if (desc) desc.classList.toggle('visible'); };
                     main.appendChild(cb); main.appendChild(textSpan);
                     if (t.count) {
                         const counter = document.createElement('div'); counter.className = 'todo-counter';
-                        const minus = document.createElement('button'); minus.textContent = '−'; minus.className = 'counter-btn minus'; minus.onclick = (e) => { e.stopPropagation(); let nv = (t.current || 0) - 1; if (nv < 0) nv = 0; t.current = nv; renderChapters(); updateBPCounter(); saveToStorage(); };
+                        const minus = document.createElement('button'); minus.textContent = '−'; minus.className = 'counter-btn minus'; minus.onclick = (e) => { e.stopPropagation(); let nv = (t.current || 0) - 1; if (nv < 0) nv = 0; t.current = nv; renderChapters(); updateBPCounter(); saveToStorage(); updateStatistics(); updateChart(); };
                         const val = document.createElement('span'); val.className = 'counter-value'; val.textContent = `${t.current || 0}/${t.count}`;
-                        const plus = document.createElement('button'); plus.textContent = '+'; plus.className = 'counter-btn'; plus.onclick = (e) => { e.stopPropagation(); let nv = (t.current || 0) + 1; if (nv > t.count) nv = t.count; t.current = nv; renderChapters(); updateBPCounter(); saveToStorage(); };
+                        const plus = document.createElement('button'); plus.textContent = '+'; plus.className = 'counter-btn'; plus.onclick = (e) => { e.stopPropagation(); let nv = (t.current || 0) + 1; if (nv > t.count) nv = t.count; t.current = nv; renderChapters(); updateBPCounter(); saveToStorage(); updateStatistics(); updateChart(); };
                         counter.appendChild(minus); counter.appendChild(val); counter.appendChild(plus); main.appendChild(counter);
                     }
                     let displayBp = t.bpValue;
@@ -1383,11 +1373,11 @@
                 });
                 chDiv.appendChild(header); chDiv.appendChild(tasksDiv); container.appendChild(chDiv);
             });
-            saveToStorage(); updateBPCounter();
+            saveToStorage(); updateBPCounter(); updateStatistics(); updateChart();
             if (isAdmin) setTimeout(() => { document.querySelectorAll('.chapter-tasks').forEach(tc => new Sortable(tc, { group: 'tasks', animation: 200, onEnd: () => saveToStorage() })); }, 100);
         }
 
-        // ==================== Админ функции (сокращены) ====================
+        // ==================== Админ функции ====================
         function addChapter() { let n = document.getElementById('newChapterName').value.trim(); if (n) { chapters.push({ id: generateId(), name: n, collapsed: false, hidden: false, tasks: [] }); document.getElementById('newChapterName').value = ''; renderChapters(); updateAdminUI(); saveToStorage(); } }
         function deleteChapter(id) { if (chapters.length <= 1) { alert('Нельзя удалить последнюю главу!'); return; } chapters = chapters.filter(ch => ch.id !== id); renderChapters(); updateAdminUI(); saveToStorage(); }
         function editChapterTitle(id, newTitle) { let ch = chapters.find(c => c.id === id); if (ch) { ch.name = newTitle; renderChapters(); updateAdminUI(); saveToStorage(); } }
@@ -1429,10 +1419,6 @@
 
         // ==================== Инициализация ====================
         function init() {
-            // Восстанавливаем lastTotal из истории
-            lastTotal = Object.values(bpHistory).reduce((a, b) => a + b, 0);
-            document.getElementById('bpTotal').textContent = lastTotal;
-            
             renderChapters();
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === currentFilter));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
