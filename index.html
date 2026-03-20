@@ -1101,34 +1101,36 @@
         }
 
         // ==================== Статистика из выполненных задач ====================
-        function calculateBPStats() {
-            let multiplier = 1;
-            if (x2Active) multiplier *= 2;
-            if (vipActive) multiplier *= 2;
-            
-            let todayTotal = 0, weekTotal = 0, monthTotal = 0;
-            const now = new Date();
-            const todayKey = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
-            
+        function calculateTotalBP() {
+            let total = 0;
             chapters.forEach(ch => {
                 if (ch.hidden) return;
                 ch.tasks.forEach(t => {
                     if (t.hidden) return;
-                    let bp = 0;
                     if (t.isAccumulative && t.count) {
-                        if (t.current > 0) bp = t.current * t.bpValue;
+                        if (t.current > 0) total += t.current * t.bpValue;
                     } else if (t.count) {
-                        if (t.current >= t.count) bp = t.bpValue;
+                        if (t.current >= t.count) total += t.bpValue;
                     } else {
-                        if (t.done) bp = t.bpValue;
+                        if (t.done) total += t.bpValue;
                     }
-                    bp *= multiplier;
-                    
-                    todayTotal += bp;
-                    weekTotal += bp;
-                    monthTotal += bp;
                 });
             });
+            let multiplier = 1;
+            if (x2Active) multiplier *= 2;
+            if (vipActive) multiplier *= 2;
+            return total * multiplier;
+        }
+        
+        function calculateBPStats() {
+            let todayTotal = 0, weekTotal = 0, monthTotal = 0;
+            const totalBP = calculateTotalBP();
+            
+            // Для демонстрации показываем одинаковые значения
+            // В будущем можно добавить историю по датам
+            todayTotal = totalBP;
+            weekTotal = totalBP;
+            monthTotal = totalBP;
             
             return { todayTotal, weekTotal, monthTotal };
         }
@@ -1150,7 +1152,7 @@
         function updateChart() {
             const period = document.querySelector('.period-btn.active')?.dataset.period || 'day';
             let labels = [], data = [], goalData = [];
-            const stats = calculateBPStats();
+            const totalBP = calculateTotalBP();
             const now = new Date();
             
             if (period === 'day') {
@@ -1158,9 +1160,10 @@
                 const currentHour = now.getHours();
                 for (let i = 0; i <= 23; i++) {
                     labels.push(i + ':00');
-                    // Показываем прогресс до текущего часа
                     if (i <= currentHour) {
-                        data.push(stats.todayTotal);
+                        // Показываем накопленный BP до текущего часа
+                        const progress = totalBP * (i / (currentHour || 1));
+                        data.push(Math.min(progress, totalBP));
                         goalData.push(dailyGoal);
                     } else {
                         data.push(null);
@@ -1173,17 +1176,23 @@
                     const day = new Date(now);
                     day.setDate(now.getDate() - i);
                     labels.push(day.toLocaleDateString('ru-RU', { weekday: 'short' }));
-                    data.push(stats.weekTotal);
+                    // Распределяем BP по дням равномерно
+                    const progress = totalBP * (7 - i) / 7;
+                    data.push(Math.min(progress, totalBP));
                     goalData.push(dailyGoal);
                 }
             } else {
                 // 30 дней месяца
                 for (let i = 29; i >= 0; i--) {
                     labels.push(i + 1);
-                    data.push(stats.monthTotal);
+                    // Распределяем BP по дням равномерно
+                    const progress = totalBP * (30 - i) / 30;
+                    data.push(Math.min(progress, totalBP));
                     goalData.push(dailyGoal);
                 }
             }
+            
+            const maxValue = Math.max(dailyGoal, totalBP, 100);
             
             if (bpChart) bpChart.destroy();
             const ctx = document.getElementById('bpChart').getContext('2d');
@@ -1222,7 +1231,7 @@
                         y: {
                             beginAtZero: true,
                             min: 0,
-                            max: Math.max(dailyGoal + 50, 100),
+                            max: maxValue,
                             grid: { color: 'rgba(255,255,255,0.1)' },
                             ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-color') }
                         },
@@ -1285,28 +1294,6 @@
             `;
         }
 
-        // ==================== BP и бонусы ====================
-        function calculateTotalBP() {
-            let total = 0;
-            chapters.forEach(ch => {
-                if (ch.hidden) return;
-                ch.tasks.forEach(t => {
-                    if (t.hidden) return;
-                    if (t.isAccumulative && t.count) {
-                        if (t.current > 0) total += t.current * t.bpValue;
-                    } else if (t.count) {
-                        if (t.current >= t.count) total += t.bpValue;
-                    } else {
-                        if (t.done) total += t.bpValue;
-                    }
-                });
-            });
-            let multiplier = 1;
-            if (x2Active) multiplier *= 2;
-            if (vipActive) multiplier *= 2;
-            return total * multiplier;
-        }
-        
         function updateBPCounter() {
             document.getElementById('bpTotal').textContent = calculateTotalBP();
         }
