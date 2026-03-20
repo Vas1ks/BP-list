@@ -6,7 +6,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        /* Все стили остаются без изменений (как в предыдущем ответе) */
+        /* Все стили без изменений (такие же, как в предыдущем ответе) */
         :root {
             --bg-color: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             --container-bg: rgba(30, 30, 30, 0.95);
@@ -1108,6 +1108,18 @@
             return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         }
         
+        // Функция для получения даты с учётом смещения (день с 7:00 до 6:59 следующего дня)
+        function getDayKeyForTime(date) {
+            const mskDate = new Date(date.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
+            // Если время меньше 7 утра, считаем это предыдущим днём
+            if (mskDate.getHours() < 7) {
+                const prevDay = new Date(mskDate);
+                prevDay.setDate(mskDate.getDate() - 1);
+                return getDateKey(prevDay);
+            }
+            return getDateKey(mskDate);
+        }
+        
         function calculateTotalBP() {
             let total = 0;
             chapters.forEach(ch => {
@@ -1129,31 +1141,42 @@
             return total * multiplier;
         }
         
+        // Сохраняем текущий BP для текущего дня
+        function saveCurrentDayStats() {
+            const now = new Date();
+            const dayKey = getDayKeyForTime(now);
+            const currentBP = calculateTotalBP();
+            dailyStats[dayKey] = currentBP;
+            localStorage.setItem('dailyStats', JSON.stringify(dailyStats));
+        }
+        
         function getStatsForPeriod() {
             const now = new Date();
             const mskNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
-            const today = getDateKey(mskNow);
+            const currentDayKey = getDayKeyForTime(now);
             const currentBP = calculateTotalBP();
             
             let todayTotal = currentBP;
             let weekTotal = 0, monthTotal = 0;
             
+            // Неделя: последние 7 дней (с учётом смены дня в 7 утра)
             for (let i = 0; i < 7; i++) {
                 const day = new Date(mskNow);
                 day.setDate(mskNow.getDate() - i);
-                const dayKey = getDateKey(day);
-                if (dayKey === today) {
+                const dayKey = getDayKeyForTime(day);
+                if (dayKey === currentDayKey) {
                     weekTotal += currentBP;
                 } else {
                     weekTotal += dailyStats[dayKey] || 0;
                 }
             }
             
+            // Месяц: последние 30 дней
             for (let i = 0; i < 30; i++) {
                 const day = new Date(mskNow);
                 day.setDate(mskNow.getDate() - i);
-                const dayKey = getDateKey(day);
-                if (dayKey === today) {
+                const dayKey = getDayKeyForTime(day);
+                if (dayKey === currentDayKey) {
                     monthTotal += currentBP;
                 } else {
                     monthTotal += dailyStats[dayKey] || 0;
@@ -1170,19 +1193,31 @@
             document.getElementById('monthBp').textContent = stats.monthTotal;
         }
         
+        function saveGoal() {
+            dailyGoal = parseInt(document.getElementById('dailyGoal').value) || 0;
+            localStorage.setItem('dailyGoal', dailyGoal);
+            updateChart();
+            alert('Цель сохранена!');
+        }
+        
         function updateChart() {
             const period = document.querySelector('.period-btn.active')?.dataset.period || 'day';
             let labels = [], data = [], goalData = [];
             const now = new Date();
             const mskNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
             const currentBP = calculateTotalBP();
+            const currentDayKey = getDayKeyForTime(now);
             
             if (period === 'day') {
+                // День с 7:00 до 6:59 следующего дня (24 часа)
                 const currentHour = mskNow.getHours();
+                // Смещение: 7 утра = 0 индекс
                 for (let i = 0; i <= 23; i++) {
-                    labels.push(i + ':00');
-                    if (i <= currentHour) {
-                        const progress = currentBP * (i / (currentHour || 1));
+                    const hourLabel = (i + 7) % 24;
+                    labels.push(hourLabel + ':00');
+                    const hourIndex = (currentHour + 24 - 7) % 24;
+                    if (i <= hourIndex) {
+                        const progress = currentBP * (i / (hourIndex || 1));
                         data.push(Math.min(progress, currentBP));
                         goalData.push(dailyGoal);
                     } else {
@@ -1191,29 +1226,28 @@
                     }
                 }
             } else if (period === 'week') {
-                const currentDay = mskNow.getDay();
-                const mondayOffset = currentDay === 0 ? 6 : currentDay - 1;
+                // Последние 7 дней (с учётом смены дня в 7 утра)
                 for (let i = 6; i >= 0; i--) {
                     const day = new Date(mskNow);
-                    day.setDate(mskNow.getDate() - mondayOffset + i);
-                    const dayKey = getDateKey(day);
+                    day.setDate(mskNow.getDate() - i);
+                    const dayKey = getDayKeyForTime(day);
                     labels.push(day.toLocaleDateString('ru-RU', { weekday: 'short' }));
                     let dayBP = dailyStats[dayKey] || 0;
-                    if (dayKey === getDateKey(mskNow)) {
+                    if (dayKey === currentDayKey) {
                         dayBP = currentBP;
                     }
                     data.push(dayBP);
                     goalData.push(dailyGoal);
                 }
             } else {
-                const daysInMonth = new Date(mskNow.getFullYear(), mskNow.getMonth() + 1, 0).getDate();
-                const currentDate = mskNow.getDate();
-                for (let i = 1; i <= daysInMonth; i++) {
-                    const day = new Date(mskNow.getFullYear(), mskNow.getMonth(), i);
-                    const dayKey = getDateKey(day);
-                    labels.push(i);
+                // Последние 30 дней
+                for (let i = 29; i >= 0; i--) {
+                    const day = new Date(mskNow);
+                    day.setDate(mskNow.getDate() - i);
+                    const dayKey = getDayKeyForTime(day);
+                    labels.push(day.getDate());
                     let dayBP = dailyStats[dayKey] || 0;
-                    if (i === currentDate) {
+                    if (dayKey === currentDayKey) {
                         dayBP = currentBP;
                     }
                     data.push(dayBP);
@@ -1341,12 +1375,12 @@
             updateBPCounter(); 
             updateStatistics(); 
             updateChart();
+            saveCurrentDayStats();
         }
         
         function setFilter(filter) { 
             currentFilter = filter; 
             localStorage.setItem('filter', filter);
-            // Обновляем активные классы на кнопках фильтров
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 if (btn.dataset.filter === filter) {
                     btn.classList.add('active');
@@ -1369,6 +1403,7 @@
                 chapters.forEach(ch => ch.tasks.forEach(t => { if (t.count) t.current = 0; else t.done = false; }));
                 renderChapters(); updateAdminUI(); saveToStorage(); 
                 updateStatistics(); updateChart();
+                saveCurrentDayStats();
                 alert('Готово!');
             }
         }
@@ -1379,6 +1414,7 @@
                 chapters = JSON.parse(JSON.stringify(DEFAULT_CHAPTERS));
                 renderChapters(); updateAdminUI(); 
                 updateStatistics(); updateChart();
+                saveCurrentDayStats();
                 alert('Готово!');
             }
         }
@@ -1416,15 +1452,15 @@
                     const tItem = document.createElement('div'); tItem.className = `todo-item ${(t.count ? t.current >= t.count : t.done) ? 'done' : ''}`;
                     const main = document.createElement('div'); main.className = 'todo-main';
                     const cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'todo-checkbox'; cb.checked = t.count ? t.current >= t.count : t.done;
-                    cb.onchange = () => { if (t.count) t.current = t.current >= t.count ? 0 : t.count; else t.done = !t.done; renderChapters(); updateBPCounter(); saveToStorage(); updateStatistics(); updateChart(); };
+                    cb.onchange = () => { if (t.count) t.current = t.current >= t.count ? 0 : t.count; else t.done = !t.done; renderChapters(); updateBPCounter(); saveToStorage(); updateStatistics(); updateChart(); saveCurrentDayStats(); };
                     const textSpan = document.createElement('span'); textSpan.className = 'todo-text'; textSpan.textContent = t.text;
                     if (!isAdmin) textSpan.onclick = () => { let desc = document.getElementById(`desc-${t.id}`); if (desc) desc.classList.toggle('visible'); };
                     main.appendChild(cb); main.appendChild(textSpan);
                     if (t.count) {
                         const counter = document.createElement('div'); counter.className = 'todo-counter';
-                        const minus = document.createElement('button'); minus.textContent = '−'; minus.className = 'counter-btn minus'; minus.onclick = (e) => { e.stopPropagation(); let nv = (t.current || 0) - 1; if (nv < 0) nv = 0; t.current = nv; renderChapters(); updateBPCounter(); saveToStorage(); updateStatistics(); updateChart(); };
+                        const minus = document.createElement('button'); minus.textContent = '−'; minus.className = 'counter-btn minus'; minus.onclick = (e) => { e.stopPropagation(); let nv = (t.current || 0) - 1; if (nv < 0) nv = 0; t.current = nv; renderChapters(); updateBPCounter(); saveToStorage(); updateStatistics(); updateChart(); saveCurrentDayStats(); };
                         const val = document.createElement('span'); val.className = 'counter-value'; val.textContent = `${t.current || 0}/${t.count}`;
-                        const plus = document.createElement('button'); plus.textContent = '+'; plus.className = 'counter-btn'; plus.onclick = (e) => { e.stopPropagation(); let nv = (t.current || 0) + 1; if (nv > t.count) nv = t.count; t.current = nv; renderChapters(); updateBPCounter(); saveToStorage(); updateStatistics(); updateChart(); };
+                        const plus = document.createElement('button'); plus.textContent = '+'; plus.className = 'counter-btn'; plus.onclick = (e) => { e.stopPropagation(); let nv = (t.current || 0) + 1; if (nv > t.count) nv = t.count; t.current = nv; renderChapters(); updateBPCounter(); saveToStorage(); updateStatistics(); updateChart(); saveCurrentDayStats(); };
                         counter.appendChild(minus); counter.appendChild(val); counter.appendChild(plus); main.appendChild(counter);
                     }
                     let displayBp = t.bpValue;
@@ -1493,9 +1529,9 @@
 
         // ==================== Инициализация ====================
         function init() {
+            saveCurrentDayStats();
             renderChapters();
             
-            // Устанавливаем активный фильтр
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 if (btn.dataset.filter === currentFilter) {
                     btn.classList.add('active');
@@ -1521,6 +1557,18 @@
             document.getElementById('dailyGoal').value = dailyGoal;
             updateStatistics();
             updateChart();
+            
+            // Проверка смены дня каждую минуту
+            let lastDayKey = getDayKeyForTime(new Date());
+            setInterval(() => {
+                const currentDayKey = getDayKeyForTime(new Date());
+                if (currentDayKey !== lastDayKey) {
+                    lastDayKey = currentDayKey;
+                    saveCurrentDayStats();
+                    updateStatistics();
+                    updateChart();
+                }
+            }, 60000);
         }
         init();
     </script>
