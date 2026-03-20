@@ -5,12 +5,16 @@
     <title>BP list</title>
     <!-- SortableJS для drag & drop -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <!-- Chart.js для графиков -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        /* --- Стили без изменений (такие же, как в предыдущем ответе) --- */
+        /* CSS переменные для тем */
         :root {
             --bg-color: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             --container-bg: rgba(30, 30, 30, 0.95);
+            --card-bg: rgba(30, 30, 30, 0.85);
             --text-color: #fff;
+            --text-secondary: #aaa;
             --chapter-bg: #2a2a2a;
             --chapter-header-bg: #333;
             --border-color: #444;
@@ -23,12 +27,16 @@
             --filter-btn-bg: #2a2a2a;
             --filter-btn-color: #aaa;
             --filter-btn-active: #4CAF50;
+            --accent-color: #4CAF50;
+            --accent-glow: rgba(76, 175, 80, 0.3);
             --transition: all 0.3s ease;
         }
         body.light-theme {
             --bg-color: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
             --container-bg: rgba(255, 255, 255, 0.95);
+            --card-bg: rgba(255, 255, 255, 0.9);
             --text-color: #333;
+            --text-secondary: #666;
             --chapter-bg: #ffffff;
             --chapter-header-bg: #f0f0f0;
             --border-color: #ddd;
@@ -42,7 +50,7 @@
             --filter-btn-color: #666;
         }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
             min-height: 100vh;
@@ -52,6 +60,154 @@
             box-sizing: border-box;
             color: var(--text-color);
             transition: background 0.3s, color 0.3s;
+        }
+
+        /* Вкладки */
+        .tabs {
+            max-width: 600px;
+            margin: 20px auto 0;
+            display: flex;
+            gap: 5px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 5px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+        .tab-btn:hover:not(.active) {
+            background: var(--todo-hover);
+            color: var(--text-color);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Профиль */
+        .profile-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .goal-setting {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .goal-setting label {
+            font-weight: 600;
+        }
+        .goal-input {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 12px;
+            width: 100px;
+            text-align: center;
+        }
+        .goal-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        .save-goal-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .save-goal-btn:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+        .chart-container {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+        .chart-container canvas {
+            max-height: 300px;
+            width: 100%;
+        }
+        .period-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        .period-btn {
+            background: var(--filter-btn-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .period-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
         }
 
         /* BP счетчик сверху */
@@ -123,7 +279,6 @@
             color: white;
         }
 
-        /* Кнопки справа: шестеренка и тема */
         .settings-buttons {
             display: flex;
             gap: 10px;
@@ -391,39 +546,17 @@
             transition: all 0.2s;
             flex-shrink: 0;
         }
-        .admin-btn-small.add {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .admin-btn-small.add:hover {
-            background-color: #45a049;
-            transform: scale(1.1);
-        }
-        .admin-btn-small.delete {
-            background-color: #ff4444;
-            color: white;
-        }
-        .admin-btn-small.delete:hover {
-            background-color: #cc0000;
-            transform: scale(1.1);
-        }
         .admin-btn-small.edit {
             background-color: #2196F3;
             color: white;
-            font-size: 14px;
-        }
-        .admin-btn-small.edit:hover {
-            background-color: #1976D2;
-            transform: scale(1.1);
         }
         .admin-btn-small.move {
             background-color: #FF9800;
             color: white;
-            font-size: 16px;
         }
-        .admin-btn-small.move:hover {
-            background-color: #F57C00;
-            transform: scale(1.1);
+        .admin-btn-small.delete {
+            background-color: #ff4444;
+            color: white;
         }
 
         .todo-description {
@@ -441,29 +574,30 @@
         .todo-description.visible {
             display: block;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
 
         @media (max-width: 500px) {
             .todo-main {
                 flex-wrap: wrap;
             }
-            .todo-counter {
+            .todo-counter, .todo-bp, .admin-controls {
                 margin-left: 30px;
             }
-            .todo-bp {
-                margin-left: 30px;
-            }
-            .admin-controls {
-                margin-left: 30px;
+            .profile-stats {
+                grid-template-columns: 1fr;
             }
         }
 
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes modalAppear {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
         }
 
         .modal {
@@ -483,10 +617,6 @@
             color: var(--text-color);
             animation: modalAppear 0.3s;
         }
-        @keyframes modalAppear {
-            from { opacity: 0; transform: translate(-50%, -60%); }
-            to { opacity: 1; transform: translate(-50%, -50%); }
-        }
         .modal.visible {
             display: block;
         }
@@ -500,24 +630,13 @@
             margin-bottom: 15px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            font-family: Arial, sans-serif;
-            box-sizing: border-box;
             background-color: var(--input-bg);
             color: var(--text-color);
-            transition: border-color 0.2s;
-        }
-        .modal input:focus, .modal textarea:focus, .modal select:focus {
-            outline: none;
-            border-color: #4CAF50;
         }
         .modal-row {
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
-        }
-        .modal-row input {
-            flex: 1;
-            margin-bottom: 0;
         }
         .modal-buttons {
             display: flex;
@@ -529,22 +648,14 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.2s;
         }
         .modal-btn.save {
             background-color: #4CAF50;
             color: white;
         }
-        .modal-btn.save:hover {
-            background-color: #45a049;
-        }
         .modal-btn.cancel {
             background-color: #555;
             color: #fff;
-        }
-        .modal-btn.cancel:hover {
-            background-color: #666;
         }
 
         .move-menu {
@@ -552,32 +663,12 @@
             background-color: var(--modal-bg);
             border: 1px solid #4CAF50;
             border-radius: 6px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
             padding: 10px;
             z-index: 100;
             display: none;
-            animation: fadeIn 0.2s;
         }
         .move-menu.visible {
             display: block;
-        }
-        .move-menu select {
-            width: 200px;
-            padding: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            margin-bottom: 10px;
-            background-color: var(--input-bg);
-            color: var(--text-color);
-        }
-        .move-menu button {
-            width: 100%;
-            padding: 8px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
         }
 
         .visibility-list {
@@ -591,28 +682,16 @@
             gap: 10px;
             padding: 8px;
             border-bottom: 1px solid var(--border-color);
-            animation: slideIn 0.2s;
         }
         .visibility-item.chapter {
             font-weight: bold;
             background-color: rgba(76, 175, 80, 0.1);
-        }
-        .visibility-item .item-name {
-            flex: 1;
-        }
-        .visibility-item .item-name.task {
-            margin-left: 20px;
         }
         .eye-btn {
             background: none;
             border: none;
             font-size: 20px;
             cursor: pointer;
-            padding: 0 5px;
-            transition: transform 0.2s;
-        }
-        .eye-btn:hover {
-            transform: scale(1.2);
         }
 
         .footer {
@@ -627,118 +706,41 @@
             background-color: var(--footer-bg);
             padding: 10px 15px;
             border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             display: flex;
             align-items: center;
             gap: 8px;
             backdrop-filter: blur(5px);
             border: 1px solid #4CAF50;
-            transition: transform 0.2s;
             text-decoration: none;
             color: var(--text-color);
         }
-        .footer-item:hover {
-            transform: scale(1.05);
-            background-color: rgba(0, 0, 0, 0.9);
-        }
-        .youtube-logo {
-            width: 24px;
-            height: 24px;
-            background: linear-gradient(45deg, #FF0000, #CC0000);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .youtube-logo::before {
-            content: "▶";
-            font-size: 12px;
-            margin-left: 1px;
-        }
-        .twitch-logo {
-            width: 24px;
-            height: 24px;
-            background: linear-gradient(45deg, #6441A5, #4b367c);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        .twitch-logo::before {
-            content: "⚡";
-            font-size: 14px;
-        }
-        .donate-logo {
-            width: 24px;
-            height: 24px;
-            background: linear-gradient(45deg, #ff6b6b, #ff4757);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        .donate-logo::before {
-            content: "❤️";
-            font-size: 14px;
-        }
-        .footer-text {
-            display: flex;
-            flex-direction: column;
-        }
-        .channel-name {
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .product-by {
-            font-size: 10px;
-            color: #aaa;
-        }
-        .product-by span {
-            color: #FF0000;
-            font-weight: bold;
-        }
-
         .admin-panel {
             max-width: 600px;
             margin: 20px auto;
             padding: 20px;
             background-color: rgba(0, 0, 0, 0.95);
             border-radius: 8px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
             color: #fff;
             border: 2px solid #4CAF50;
             display: none;
         }
         .admin-panel.visible {
             display: block;
-            animation: slideIn 0.3s;
         }
         .admin-title {
             text-align: center;
             color: #4CAF50;
-            margin-top: 0;
             margin-bottom: 20px;
-            font-size: 24px;
         }
         .admin-section {
             margin-bottom: 20px;
             padding: 15px;
-            background-color: rgba(255,255,255,0.1);
+            background-color: rgba(255, 255, 255, 0.1);
             border-radius: 8px;
         }
         .admin-section h3 {
             margin-top: 0;
             color: #4CAF50;
-            font-size: 16px;
         }
         .admin-input {
             width: 100%;
@@ -748,28 +750,14 @@
             border: 1px solid #444;
             color: #fff;
             border-radius: 4px;
-            box-sizing: border-box;
-        }
-        .admin-row {
-            display: flex;
-            gap: 10px;
-        }
-        .admin-row .admin-input {
-            flex: 1;
         }
         .admin-btn {
             background-color: #4CAF50;
             color: white;
             border: none;
-            border-radius: 4px;
             padding: 8px 15px;
             cursor: pointer;
-            margin-right: 5px;
-            font-size: 13px;
-            transition: background-color 0.2s;
-        }
-        .admin-btn:hover {
-            background-color: #45a049;
+            border-radius: 4px;
         }
         .admin-btn.danger {
             background-color: #ff4444;
@@ -787,14 +775,12 @@
             background-color: rgba(0, 0, 0, 0.95);
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.9);
             z-index: 2000;
             border: 2px solid #4CAF50;
             display: none;
         }
         .password-modal.visible {
             display: block;
-            animation: modalAppear 0.3s;
         }
         .password-modal input {
             width: 100%;
@@ -810,7 +796,7 @@
 <body>
     <!-- Модалка для пароля -->
     <div class="password-modal" id="passwordModal">
-        <h3 style="color: #4CAF50; text-align: center; margin-top: 0;">Вход в админ-панель</h3>
+        <h3 style="color: #4CAF50; text-align: center;">Вход в админ-панель</h3>
         <input type="password" id="passwordInput" placeholder="Введите пароль" onkeypress="if(event.key==='Enter') checkPassword()">
         <button class="admin-btn" onclick="checkPassword()" style="width: 100%;">Войти</button>
     </div>
@@ -823,7 +809,7 @@
             <input type="number" id="editTaskCount" placeholder="Количество" min="1" value="1">
             <input type="number" id="editTaskBP" placeholder="BP" min="0" value="0">
         </div>
-        <textarea id="editTaskDescription" placeholder="Описание задачи (необязательно)"></textarea>
+        <textarea id="editTaskDescription" placeholder="Описание задачи"></textarea>
         <select id="editTaskChapter"></select>
         <div class="modal-buttons">
             <button class="modal-btn cancel" onclick="closeEditModal()">Отмена</button>
@@ -847,116 +833,130 @@
         <button onclick="moveTask()">Перенести</button>
     </div>
 
-    <!-- BP счетчик и бонусы + кнопки -->
-    <div class="bp-header">
-        <div class="bp-bonuses">
-            <button class="bonus-btn x2" onclick="toggleBonus('x2')" id="x2Btn">X2</button>
-            <button class="bonus-btn vip" onclick="toggleBonus('vip')" id="vipBtn">VIP</button>
+    <!-- Вкладки -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="tasks">📋 Задачи</button>
+        <button class="tab-btn" data-tab="profile">👤 Профиль</button>
+    </div>
+
+    <!-- Контент задач -->
+    <div class="tab-content active" id="tasks-tab">
+        <div class="bp-header">
+            <div class="bp-bonuses">
+                <button class="bonus-btn x2" onclick="toggleBonus('x2')" id="x2Btn">X2</button>
+                <button class="bonus-btn vip" onclick="toggleBonus('vip')" id="vipBtn">VIP</button>
+            </div>
+            <div class="settings-buttons">
+                <button class="icon-btn" onclick="openVisibilityModal()">⚙️</button>
+                <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">🌞</button>
+            </div>
+            <div class="bp-counter">
+                <span class="bp-icon">BP</span>
+                <span id="bpTotal">0</span>
+            </div>
         </div>
-        <div class="settings-buttons">
-            <button class="icon-btn" id="visibilityBtn" onclick="openVisibilityModal()" title="Настройки видимости">⚙️</button>
-            <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Сменить тему">🌞</button>
+
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">Все</button>
+            <button class="filter-btn" data-filter="active" onclick="setFilter('active')">Активные</button>
+            <button class="filter-btn" data-filter="completed" onclick="setFilter('completed')">Выполненные</button>
+            <button class="filter-btn" onclick="restartTasks()">🔄 Restart</button>
+            <button class="filter-btn" onclick="hardRestartTasks()">💣 Hard Restart</button>
         </div>
-        <div class="bp-counter">
-            <span class="bp-icon">BP</span>
-            <span id="bpTotal">0</span>
+
+        <div class="container">
+            <h1>BP list</h1>
+            <div id="chaptersList"></div>
         </div>
     </div>
 
-    <!-- Фильтры -->
-    <div class="filters">
-        <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">Все</button>
-        <button class="filter-btn" data-filter="active" onclick="setFilter('active')">Активные</button>
-        <button class="filter-btn" data-filter="completed" onclick="setFilter('completed')">Выполненные</button>
-        <button class="filter-btn" onclick="restartTasks()">🔄 Restart</button>
-        <button class="filter-btn" onclick="hardRestartTasks()">💣 Hard Restart</button>
-    </div>
+    <!-- Контент профиля -->
+    <div class="tab-content" id="profile-tab">
+        <div class="container" style="margin-top: 20px;">
+            <div class="profile-header">
+                <h2>📊 Моя статистика</h2>
+            </div>
 
-    <div class="container">
-        <h1>BP list</h1>
-        <div id="chaptersList"></div>
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="todayBp">0</div>
+                    <div class="stat-label">Сегодня</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="weekBp">0</div>
+                    <div class="stat-label">Эта неделя</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="monthBp">0</div>
+                    <div class="stat-label">Этот месяц</div>
+                </div>
+            </div>
+
+            <div class="goal-setting">
+                <label>🎯 Цель на день:</label>
+                <input type="number" id="dailyGoal" class="goal-input" value="150" step="10">
+                <button class="save-goal-btn" onclick="saveGoal()">Сохранить</button>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="bpChart"></canvas>
+                <div class="period-buttons">
+                    <button class="period-btn active" data-period="day">День</button>
+                    <button class="period-btn" data-period="week">Неделя</button>
+                    <button class="period-btn" data-period="month">Месяц</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Админ-панель -->
     <div class="admin-panel" id="adminPanel">
         <h2 class="admin-title">⚙️ Панель управления</h2>
-        
         <div class="admin-section">
             <h3>📚 Главы</h3>
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <input type="text" id="newChapterName" class="admin-input" placeholder="Название главы" style="margin-bottom: 0;">
-                <button class="admin-btn" onclick="addChapter()" style="white-space: nowrap;">➕ Добавить</button>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="newChapterName" class="admin-input" placeholder="Название главы">
+                <button class="admin-btn" onclick="addChapter()">➕ Добавить</button>
             </div>
             <div id="chaptersList-admin"></div>
         </div>
-        
         <div class="admin-section">
             <h3>➕ Задачи</h3>
             <select id="taskChapter" class="admin-input"></select>
-            <div class="admin-row">
-                <input type="text" id="adminNewTodo" class="admin-input" placeholder="Текст задачи">
-                <input type="number" id="taskCount" class="admin-input" placeholder="Кол-во" value="1" min="1" style="width: 80px;">
-            </div>
-            <div class="admin-row">
-                <input type="number" id="taskBP" class="admin-input" placeholder="BP за задачу" value="0" min="0">
-            </div>
-            <button class="admin-btn" onclick="adminAddTodo()" style="width: 100%;">Добавить задачу</button>
+            <input type="text" id="adminNewTodo" class="admin-input" placeholder="Текст задачи">
+            <input type="number" id="taskCount" class="admin-input" placeholder="Кол-во" value="1">
+            <input type="number" id="taskBP" class="admin-input" placeholder="BP" value="0">
+            <button class="admin-btn" onclick="adminAddTodo()">Добавить задачу</button>
         </div>
-        
         <div class="admin-section">
             <h3>📝 Массовое добавление</h3>
             <textarea id="bulkTodos" class="admin-input" placeholder="Формат: Текст | Количество | BP" rows="4"></textarea>
             <select id="bulkChapter" class="admin-input"></select>
-            <button class="admin-btn" onclick="adminAddBulk()" style="width: 100%;">Добавить все</button>
+            <button class="admin-btn" onclick="adminAddBulk()">Добавить все</button>
         </div>
-        
         <div class="admin-section">
             <h3>💾 Импорт/Экспорт</h3>
             <textarea id="importExportData" class="admin-input" readonly rows="4"></textarea>
-            <div style="display: flex; gap: 10px;">
-                <button class="admin-btn" onclick="adminExport()" style="flex: 1;">📋 Копировать</button>
-                <button class="admin-btn warning" onclick="adminImport()" style="flex: 1;">📂 Импорт</button>
-            </div>
+            <button class="admin-btn" onclick="adminExport()">📋 Копировать</button>
+            <button class="admin-btn warning" onclick="adminImport()">📂 Импорт</button>
         </div>
-        
         <div class="admin-section">
             <h3>🔧 Управление</h3>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="admin-btn warning" onclick="adminCollapseAllDone()">📁 Свернуть готовые</button>
-                <button class="admin-btn warning" onclick="adminExpandAll()">📂 Развернуть всё</button>
-                <button class="admin-btn danger" onclick="adminDeleteAllDone()">✅ Удалить готовые</button>
-                <button class="admin-btn danger" onclick="adminClearAll()">🗑️ Очистить всё</button>
-                <button class="admin-btn danger" onclick="adminLogout()">🚪 Выйти</button>
-            </div>
+            <button class="admin-btn warning" onclick="adminCollapseAllDone()">📁 Свернуть готовые</button>
+            <button class="admin-btn warning" onclick="adminExpandAll()">📂 Развернуть всё</button>
+            <button class="admin-btn danger" onclick="adminDeleteAllDone()">✅ Удалить готовые</button>
+            <button class="admin-btn danger" onclick="adminClearAll()">🗑️ Очистить всё</button>
+            <button class="admin-btn danger" onclick="adminLogout()">🚪 Выйти</button>
         </div>
     </div>
 
     <!-- Футер -->
     <div class="footer">
-        <a href="https://www.youtube.com/@vas1ks777" target="_blank" class="footer-item">
-            <div class="youtube-logo"></div>
-            <div class="footer-text">
-                <span class="channel-name">YouTube</span>
-                <span class="product-by">@vas1ks777</span>
-            </div>
-        </a>
-        <a href="https://www.twitch.tv/vas1ks0_0" target="_blank" class="footer-item">
-            <div class="twitch-logo"></div>
-            <div class="footer-text">
-                <span class="channel-name">Twitch</span>
-                <span class="product-by">vas1ks0_0</span>
-            </div>
-        </a>
-        <a href="https://www.donationalerts.com/r/vas1ks0_0" target="_blank" class="footer-item">
-            <div class="donate-logo"></div>
-            <div class="footer-text">
-                <span class="channel-name">Donate</span>
-                <span class="product-by">Поддержать проект</span>
-            </div>
-        </a>
+        <a href="https://www.youtube.com/@vas1ks777" target="_blank" class="footer-item"><span>▶</span><span>YouTube</span></a>
+        <a href="https://www.twitch.tv/vas1ks0_0" target="_blank" class="footer-item"><span>⚡</span><span>Twitch</span></a>
+        <a href="https://www.donationalerts.com/r/vas1ks0_0" target="_blank" class="footer-item"><span>❤️</span><span>Donate</span></a>
     </div>
-
-    <script>
+        <script>
         // ==================== Пароль админа ====================
         const ADMIN_PASSWORD = "314159";
 
@@ -968,30 +968,9 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { 
-                        id: "t1", 
-                        text: "Поймать нули", 
-                        done: false, 
-                        bpValue: 2, 
-                        description: "Выиграть в рулетке, поставив на 0 или 00",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t2", 
-                        text: "Мафия", 
-                        done: false, 
-                        bpValue: 3, 
-                        description: "Сыграть в мафию в казино",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t3", 
-                        text: "Ставка в межсерверном колесе", 
-                        done: false, 
-                        bpValue: 3, 
-                        description: "Поставить ставку в межсерверном колесе от 100 фишек",
-                        hidden: false 
-                    }
+                    { id: "t1", text: "Поймать нули", done: false, bpValue: 2, description: "Выиграть в рулетке, поставив на 0 или 00", hidden: false },
+                    { id: "t2", text: "Мафия", done: false, bpValue: 3, description: "Сыграть в мафию в казино", hidden: false },
+                    { id: "t3", text: "Ставка в межсерверном колесе", done: false, bpValue: 3, description: "Поставить ставку в межсерверном колесе от 100 фишек", hidden: false }
                 ]
             },
             {
@@ -1000,73 +979,14 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { 
-                        id: "t4", 
-                        text: "Большой теннис", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Постоять 1 минуту AFK в зоне",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t5", 
-                        text: "Пинг-понг", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Постоять 1 минуту AFK в зоне",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t6", 
-                        text: "Волейбол", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Постоять 1 минуту AFK в зоне",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t7", 
-                        text: "Поймать рыбу", 
-                        count: 20, 
-                        current: 0, 
-                        bpValue: 4, 
-                        description: "Поймать 20 рыб",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t8", 
-                        text: "Сокровище", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Найти сокровище (не мусор)",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t9", 
-                        text: "Футбол", 
-                        count: 2, 
-                        current: 0, 
-                        bpValue: 1, 
-                        description: "Забить 2 гола в футболе",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t10", 
-                        text: "Баскетбол", 
-                        count: 2, 
-                        current: 0, 
-                        bpValue: 1, 
-                        description: "Забросить 2 мяча в кольцо",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t11", 
-                        text: "Дартс", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Выиграть в дартсе",
-                        hidden: false 
-                    }
+                    { id: "t4", text: "Большой теннис", done: false, bpValue: 1, description: "Постоять 1 минуту AFK в зоне", hidden: false },
+                    { id: "t5", text: "Пинг-понг", done: false, bpValue: 1, description: "Постоять 1 минуту AFK в зоне", hidden: false },
+                    { id: "t6", text: "Волейбол", done: false, bpValue: 1, description: "Постоять 1 минуту AFK в зоне", hidden: false },
+                    { id: "t7", text: "Поймать рыбу", count: 20, current: 0, bpValue: 4, description: "Поймать 20 рыб", hidden: false },
+                    { id: "t8", text: "Сокровище", done: false, bpValue: 1, description: "Найти сокровище (не мусор)", hidden: false },
+                    { id: "t9", text: "Футбол", count: 2, current: 0, bpValue: 1, description: "Забить 2 гола в футболе", hidden: false },
+                    { id: "t10", text: "Баскетбол", count: 2, current: 0, bpValue: 1, description: "Забросить 2 мяча в кольцо", hidden: false },
+                    { id: "t11", text: "Дартс", done: false, bpValue: 1, description: "Выиграть в дартсе", hidden: false }
                 ]
             },
             {
@@ -1075,69 +995,13 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { 
-                        id: "t12", 
-                        text: "Стройка", 
-                        count: 25, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Выполнить 25 действий",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t13", 
-                        text: "Порт", 
-                        count: 25, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Выполнить 25 действий",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t14", 
-                        text: "Шахта", 
-                        count: 25, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Выполнить 25 действий",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t15", 
-                        text: "Ферма", 
-                        count: 10, 
-                        current: 0, 
-                        bpValue: 1, 
-                        description: "Выполнить 10 действий",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t16", 
-                        text: "Рейсы на автобусе", 
-                        count: 2, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Проехать 2 круга",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t17", 
-                        text: "Пожарный", 
-                        count: 25, 
-                        current: 0, 
-                        bpValue: 1, 
-                        description: "Потушить 25 огоньков",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t18", 
-                        text: "Заказы на дальнобое", 
-                        count: 3, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Отвезти 3 заказа (не клубы)",
-                        hidden: false 
-                    }
+                    { id: "t12", text: "Стройка", count: 25, current: 0, bpValue: 2, description: "Выполнить 25 действий", hidden: false },
+                    { id: "t13", text: "Порт", count: 25, current: 0, bpValue: 2, description: "Выполнить 25 действий", hidden: false },
+                    { id: "t14", text: "Шахта", count: 25, current: 0, bpValue: 2, description: "Выполнить 25 действий", hidden: false },
+                    { id: "t15", text: "Ферма", count: 10, current: 0, bpValue: 1, description: "Выполнить 10 действий", hidden: false },
+                    { id: "t16", text: "Рейсы на автобусе", count: 2, current: 0, bpValue: 2, description: "Проехать 2 круга", hidden: false },
+                    { id: "t17", text: "Пожарный", count: 25, current: 0, bpValue: 1, description: "Потушить 25 огоньков", hidden: false },
+                    { id: "t18", text: "Заказы на дальнобое", count: 3, current: 0, bpValue: 2, description: "Отвезти 3 заказа (не клубы)", hidden: false }
                 ]
             },
             {
@@ -1146,38 +1010,10 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { 
-                        id: "t19", 
-                        text: "Лотерея", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Купить лотерейный билет",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t20", 
-                        text: "Match", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Поставить лайк",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t21", 
-                        text: "Brawl", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Зайти в канал от 2 человек",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t22", 
-                        text: "Сайт", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Посетить любой сайт в браузере",
-                        hidden: false 
-                    }
+                    { id: "t19", text: "Лотерея", done: false, bpValue: 1, description: "Купить лотерейный билет", hidden: false },
+                    { id: "t20", text: "Match", done: false, bpValue: 1, description: "Поставить лайк", hidden: false },
+                    { id: "t21", text: "Brawl", done: false, bpValue: 1, description: "Зайти в канал от 2 человек", hidden: false },
+                    { id: "t22", text: "Сайт", done: false, bpValue: 1, description: "Посетить любой сайт в браузере", hidden: false }
                 ]
             },
             {
@@ -1186,57 +1022,12 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { 
-                        id: "t23", 
-                        text: "Картинг", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Выиграть в заезде",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t24", 
-                        text: "ТК", 
-                        count: 5, 
-                        current: 0, 
-                        bpValue: 1, 
-                        description: "Выиграть 5 раз на ТК со ставкой от 100",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t25", 
-                        text: "Арена", 
-                        count: 3, 
-                        current: 0, 
-                        bpValue: 1, 
-                        description: "Выиграть 3 раза на арене со ставкой от 100",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t26", 
-                        text: "Гонка", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Финишировать в гонке со ставкой от 1000",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t27", 
-                        text: "Армрестлинг", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Выиграть в армрестлинг",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t28", 
-                        text: "Dance-battle", 
-                        count: 3, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Выиграть 3 дуэли в dance battle",
-                        hidden: false 
-                    }
+                    { id: "t23", text: "Картинг", done: false, bpValue: 1, description: "Выиграть в заезде", hidden: false },
+                    { id: "t24", text: "ТК", count: 5, current: 0, bpValue: 1, description: "Выиграть 5 раз на ТК со ставкой от 100", hidden: false },
+                    { id: "t25", text: "Арена", count: 3, current: 0, bpValue: 1, description: "Выиграть 3 раза на арене со ставкой от 100", hidden: false },
+                    { id: "t26", text: "Гонка", done: false, bpValue: 1, description: "Финишировать в гонке со ставкой от 1000", hidden: false },
+                    { id: "t27", text: "Армрестлинг", done: false, bpValue: 1, description: "Выиграть в армрестлинг", hidden: false },
+                    { id: "t28", text: "Dance-battle", count: 3, current: 0, bpValue: 2, description: "Выиграть 3 дуэли в dance battle", hidden: false }
                 ]
             },
             {
@@ -1245,39 +1036,10 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { 
-                        id: "t29", 
-                        text: "Аренда киностудии", 
-                        done: false, 
-                        bpValue: 2, 
-                        description: "Арендовать киностудию",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t30", 
-                        text: "Тир", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Успешно пройти тренировку в тире",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t31", 
-                        text: "Кинотеатр", 
-                        count: 5, 
-                        current: 0, 
-                        bpValue: 1, 
-                        description: "Добавить 5 видео в кинотеатр",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t32", 
-                        text: "Лизинг", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Оплатить лизинг в банке",
-                        hidden: false 
-                    }
+                    { id: "t29", text: "Аренда киностудии", done: false, bpValue: 2, description: "Арендовать киностудию", hidden: false },
+                    { id: "t30", text: "Тир", done: false, bpValue: 1, description: "Успешно пройти тренировку в тире", hidden: false },
+                    { id: "t31", text: "Кинотеатр", count: 5, current: 0, bpValue: 1, description: "Добавить 5 видео в кинотеатр", hidden: false },
+                    { id: "t32", text: "Лизинг", done: false, bpValue: 1, description: "Оплатить лизинг в банке", hidden: false }
                 ]
             },
             {
@@ -1286,24 +1048,8 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { 
-                        id: "t33", 
-                        text: "Кинуть мячик", 
-                        count: 15, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Кинуть 15 раз мячик питомцу",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t34", 
-                        text: "Команды", 
-                        count: 15, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Питомец должен правильно выполнить 15 команд",
-                        hidden: false 
-                    }
+                    { id: "t33", text: "Кинуть мячик", count: 15, current: 0, bpValue: 2, description: "Кинуть 15 раз мячик питомцу", hidden: false },
+                    { id: "t34", text: "Команды", count: 15, current: 0, bpValue: 2, description: "Питомец должен правильно выполнить 15 команд", hidden: false }
                 ]
             },
             {
@@ -1312,118 +1058,19 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { 
-                        id: "t35", 
-                        text: "3 часа онлайн", 
-                        count: 8, 
-                        current: 0, 
-                        bpValue: 2, 
-                        isAccumulative: true,
-                        description: "Каждые 3 часа онлайн +2 BP",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t36", 
-                        text: "Тренажерный зал", 
-                        count: 20, 
-                        current: 0, 
-                        bpValue: 1, 
-                        description: "20 успешных подходов",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t37", 
-                        text: "Посылки", 
-                        count: 10, 
-                        current: 0, 
-                        bpValue: 1, 
-                        description: "10 раз отвезти почту",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t38", 
-                        text: "Смена внешности", 
-                        count: 2, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Оплатить 2 раза смену внешности у NPC хирурга в EMS",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t39", 
-                        text: "Метро", 
-                        done: false, 
-                        bpValue: 2, 
-                        description: "Проехать 1 остановку на метро",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t40", 
-                        text: "Кейс за DP", 
-                        done: false, 
-                        bpValue: 10, 
-                        description: "Открыть Silver/Gold/Drive case за DP",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t41", 
-                        text: "Задания клуба", 
-                        count: 2, 
-                        current: 0, 
-                        bpValue: 4, 
-                        description: "Выполнить 2 задания клуба",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t42", 
-                        text: "Охота", 
-                        count: 5, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Снять 5 раз 100% шкуру",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t43", 
-                        text: "Автосервис", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Починить любую деталь у собственного авто",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t44", 
-                        text: "Обезбол/Травка", 
-                        done: false, 
-                        bpValue: 4, 
-                        description: "Положить 1 обезбол / посадить траву",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t45", 
-                        text: "AirDrop", 
-                        count: 2, 
-                        current: 0, 
-                        bpValue: 4, 
-                        description: "Заехать в желтую зону AirDrop",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t46", 
-                        text: "Чужое авто в автосервисе", 
-                        done: false, 
-                        bpValue: 2, 
-                        description: "Починить любую деталь у чужого авто с прочностью < 90%",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t47", 
-                        text: "Материалы", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Включить и выключить заказ материалов на бизнес",
-                        hidden: false 
-                    }
+                    { id: "t35", text: "3 часа онлайн", count: 8, current: 0, bpValue: 2, isAccumulative: true, description: "Каждые 3 часа онлайн +2 BP", hidden: false },
+                    { id: "t36", text: "Тренажерный зал", count: 20, current: 0, bpValue: 1, description: "20 успешных подходов", hidden: false },
+                    { id: "t37", text: "Посылки", count: 10, current: 0, bpValue: 1, description: "10 раз отвезти почту", hidden: false },
+                    { id: "t38", text: "Смена внешности", count: 2, current: 0, bpValue: 2, description: "Оплатить 2 раза смену внешности у NPC хирурга в EMS", hidden: false },
+                    { id: "t39", text: "Метро", done: false, bpValue: 2, description: "Проехать 1 остановку на метро", hidden: false },
+                    { id: "t40", text: "Кейс за DP", done: false, bpValue: 10, description: "Открыть Silver/Gold/Drive case за DP", hidden: false },
+                    { id: "t41", text: "Задания клуба", count: 2, current: 0, bpValue: 4, description: "Выполнить 2 задания клуба", hidden: false },
+                    { id: "t42", text: "Охота", count: 5, current: 0, bpValue: 2, description: "Снять 5 раз 100% шкуру", hidden: false },
+                    { id: "t43", text: "Автосервис", done: false, bpValue: 1, description: "Починить любую деталь у собственного авто", hidden: false },
+                    { id: "t44", text: "Обезбол/Травка", done: false, bpValue: 4, description: "Положить 1 обезбол / посадить траву", hidden: false },
+                    { id: "t45", text: "AirDrop", count: 2, current: 0, bpValue: 4, description: "Заехать в желтую зону AirDrop", hidden: false },
+                    { id: "t46", text: "Чужое авто в автосервисе", done: false, bpValue: 2, description: "Починить любую деталь у чужого авто с прочностью < 90%", hidden: false },
+                    { id: "t47", text: "Материалы", done: false, bpValue: 1, description: "Включить и выключить заказ материалов на бизнес", hidden: false }
                 ]
             },
             {
@@ -1432,109 +1079,21 @@
                 collapsed: false,
                 hidden: false,
                 tasks: [
-                    { 
-                        id: "t48", 
-                        text: "Граффити", 
-                        count: 7, 
-                        current: 0, 
-                        bpValue: 1, 
-                        description: "Закрасить 7 граффити",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t49", 
-                        text: "Контрабанда", 
-                        count: 5, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Сдать 5 контрабанды",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t50", 
-                        text: "Бизвар/Капт", 
-                        count: 5, 
-                        current: 0, 
-                        bpValue: 1, 
-                        description: "Участие в бизнес-вар / капт",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t51", 
-                        text: "Мед карты", 
-                        count: 15, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Выдать 15 мед карт в EMS",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t52", 
-                        text: "Вызовы", 
-                        count: 15, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Закрыть 15 вызовов в EMS",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t53", 
-                        text: "Объявления", 
-                        count: 40, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Отредактировать 40 объявлений в WN",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t54", 
-                        text: "Дома/угонки", 
-                        count: 15, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Взломать 15 замков в ограблении домов или угона авто",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t55", 
-                        text: "Коды", 
-                        count: 5, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Закрыть 5 кодов в силовой гос. структуре",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t56", 
-                        text: "Авто на учет", 
-                        count: 2, 
-                        current: 0, 
-                        bpValue: 1, 
-                        description: "Поставить 2 авто на учет",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t57", 
-                        text: "Арест", 
-                        done: false, 
-                        bpValue: 1, 
-                        description: "Посадить в КПЗ",
-                        hidden: false 
-                    },
-                    { 
-                        id: "t58", 
-                        text: "Выкуп из КПЗ", 
-                        count: 2, 
-                        current: 0, 
-                        bpValue: 2, 
-                        description: "Вытащить из КПЗ",
-                        hidden: false 
-                    }
+                    { id: "t48", text: "Граффити", count: 7, current: 0, bpValue: 1, description: "Закрасить 7 граффити", hidden: false },
+                    { id: "t49", text: "Контрабанда", count: 5, current: 0, bpValue: 2, description: "Сдать 5 контрабанды", hidden: false },
+                    { id: "t50", text: "Бизвар/Капт", count: 5, current: 0, bpValue: 1, description: "Участие в бизнес-вар / капт", hidden: false },
+                    { id: "t51", text: "Мед карты", count: 15, current: 0, bpValue: 2, description: "Выдать 15 мед карт в EMS", hidden: false },
+                    { id: "t52", text: "Вызовы", count: 15, current: 0, bpValue: 2, description: "Закрыть 15 вызовов в EMS", hidden: false },
+                    { id: "t53", text: "Объявления", count: 40, current: 0, bpValue: 2, description: "Отредактировать 40 объявлений в WN", hidden: false },
+                    { id: "t54", text: "Дома/угонки", count: 15, current: 0, bpValue: 2, description: "Взломать 15 замков в ограблении домов или угона авто", hidden: false },
+                    { id: "t55", text: "Коды", count: 5, current: 0, bpValue: 2, description: "Закрыть 5 кодов в силовой гос. структуре", hidden: false },
+                    { id: "t56", text: "Авто на учет", count: 2, current: 0, bpValue: 1, description: "Поставить 2 авто на учет", hidden: false },
+                    { id: "t57", text: "Арест", done: false, bpValue: 1, description: "Посадить в КПЗ", hidden: false },
+                    { id: "t58", text: "Выкуп из КПЗ", count: 2, current: 0, bpValue: 2, description: "Вытащить из КПЗ", hidden: false }
                 ]
             }
         ];
 
-        // Загружаем данные
         let chapters = JSON.parse(localStorage.getItem('chapters'));
         if (!chapters) {
             chapters = DEFAULT_CHAPTERS;
@@ -1548,6 +1107,12 @@
         let vipActive = false;
         let currentFilter = localStorage.getItem('filter') || 'all';
 
+        // История BP
+        let bpHistory = JSON.parse(localStorage.getItem('bpHistory')) || {};
+        let dailyGoal = parseInt(localStorage.getItem('dailyGoal')) || 150;
+        let lastBP = 0;
+        let bpChart = null;
+
         // Тема
         let isDarkTheme = localStorage.getItem('theme') !== 'light';
         if (!isDarkTheme) document.body.classList.add('light-theme');
@@ -1557,801 +1122,284 @@
             return Date.now() + Math.random().toString(36).substr(2, 9);
         }
 
-        // ==================== Сохранение данных в localStorage ====================
-        function saveToStorage() {
-            localStorage.setItem('chapters', JSON.stringify(chapters));
+        // ==================== Статистика ====================
+        function getTodayKey() {
+            const d = new Date();
+            return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+        }
+        function getWeekKey() {
+            const d = new Date();
+            const start = new Date(d.getFullYear(), 0, 1);
+            return `${d.getFullYear()}-W${Math.ceil((((d - start) / 86400000) + start.getDay() + 1) / 7)}`;
+        }
+        function getMonthKey() {
+            const d = new Date();
+            return `${d.getFullYear()}-${d.getMonth()+1}`;
+        }
+        function updateStatistics() {
+            const today = getTodayKey();
+            const week = getWeekKey();
+            const month = getMonthKey();
+            let todayTotal = 0, weekTotal = 0, monthTotal = 0;
+            for (let [date, val] of Object.entries(bpHistory)) {
+                if (date === today) todayTotal += val;
+                if (date.startsWith(week.split('-')[0]) && date.includes(week.split('-')[1])) weekTotal += val;
+                if (date.startsWith(month)) monthTotal += val;
+            }
+            document.getElementById('todayBp').textContent = todayTotal;
+            document.getElementById('weekBp').textContent = weekTotal;
+            document.getElementById('monthBp').textContent = monthTotal;
+        }
+        function saveGoal() {
+            dailyGoal = parseInt(document.getElementById('dailyGoal').value) || 0;
+            localStorage.setItem('dailyGoal', dailyGoal);
+            updateChart();
+            alert('Цель сохранена!');
+        }
+        function updateChart() {
+            const period = document.querySelector('.period-btn.active')?.dataset.period || 'day';
+            let labels = [], data = [], goalData = [];
+            const now = new Date();
+            if (period === 'day') {
+                for (let i = 23; i >= 0; i--) {
+                    const hour = new Date(now.getTime() - i * 3600000);
+                    const key = `${hour.getFullYear()}-${hour.getMonth()+1}-${hour.getDate()} ${hour.getHours()}:00`;
+                    labels.push(hour.getHours() + ':00');
+                    let hourTotal = 0;
+                    for (let [dt, val] of Object.entries(bpHistory)) {
+                        if (dt.startsWith(key.split(' ')[0]) && dt.includes(key.split(' ')[1])) hourTotal += val;
+                    }
+                    data.push(hourTotal);
+                    goalData.push(dailyGoal / 24);
+                }
+            } else if (period === 'week') {
+                for (let i = 6; i >= 0; i--) {
+                    const day = new Date(now.getTime() - i * 86400000);
+                    const key = `${day.getFullYear()}-${day.getMonth()+1}-${day.getDate()}`;
+                    labels.push(day.toLocaleDateString('ru-RU', { weekday: 'short' }));
+                    let dayTotal = 0;
+                    for (let [date, val] of Object.entries(bpHistory)) if (date.startsWith(key)) dayTotal += val;
+                    data.push(dayTotal);
+                    goalData.push(dailyGoal);
+                }
+            } else {
+                for (let i = 29; i >= 0; i--) {
+                    const day = new Date(now.getTime() - i * 86400000);
+                    const key = `${day.getFullYear()}-${day.getMonth()+1}-${day.getDate()}`;
+                    labels.push(day.getDate());
+                    let dayTotal = 0;
+                    for (let [date, val] of Object.entries(bpHistory)) if (date.startsWith(key)) dayTotal += val;
+                    data.push(dayTotal);
+                    goalData.push(dailyGoal);
+                }
+            }
+            if (bpChart) bpChart.destroy();
+            const ctx = document.getElementById('bpChart').getContext('2d');
+            bpChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Заработано BP', data: data, borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.1)', fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: '#4CAF50' },
+                        { label: 'Цель', data: goalData, borderColor: '#ff4444', borderWidth: 2, borderDash: [5, 5], fill: false, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color') } }
+                    }
+                }
+            });
+        }
+        function recordBP(amount) {
+            const now = new Date();
+            const key = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:00`;
+            bpHistory[key] = (bpHistory[key] || 0) + amount;
+            localStorage.setItem('bpHistory', JSON.stringify(bpHistory));
+            updateStatistics();
+            updateChart();
         }
 
         // ==================== BP и бонусы ====================
         function calculateTotalBP() {
             let total = 0;
-            chapters.forEach(chapter => {
-                if (chapter.hidden) return;
-                chapter.tasks.forEach(task => {
-                    if (task.hidden) return;
-                    
-                    if (task.isAccumulative && task.count) {
-                        if (task.current > 0 && task.bpValue) {
-                            let bp = task.current * task.bpValue;
-                            let multiplier = 1;
-                            if (x2Active) multiplier *= 2;
-                            if (vipActive) multiplier *= 2;
-                            total += bp * multiplier;
-                        }
-                    }
-                    else if (task.count) {
-                        if (task.current >= task.count && task.bpValue) {
-                            let bp = task.bpValue;
-                            let multiplier = 1;
-                            if (x2Active) multiplier *= 2;
-                            if (vipActive) multiplier *= 2;
-                            total += bp * multiplier;
-                        }
-                    }
-                    else {
-                        if (task.done && task.bpValue) {
-                            let bp = task.bpValue;
-                            let multiplier = 1;
-                            if (x2Active) multiplier *= 2;
-                            if (vipActive) multiplier *= 2;
-                            total += bp * multiplier;
-                        }
+            chapters.forEach(ch => {
+                if (ch.hidden) return;
+                ch.tasks.forEach(t => {
+                    if (t.hidden) return;
+                    if (t.isAccumulative && t.count) {
+                        if (t.current > 0) total += t.current * t.bpValue;
+                    } else if (t.count) {
+                        if (t.current >= t.count) total += t.bpValue;
+                    } else {
+                        if (t.done) total += t.bpValue;
                     }
                 });
             });
-            return Math.round(total);
+            let multiplier = 1;
+            if (x2Active) multiplier *= 2;
+            if (vipActive) multiplier *= 2;
+            return total * multiplier;
         }
-
         function updateBPCounter() {
-            document.getElementById('bpTotal').textContent = calculateTotalBP();
+            const total = calculateTotalBP();
+            if (total > lastBP) recordBP(total - lastBP);
+            lastBP = total;
+            document.getElementById('bpTotal').textContent = total;
         }
-
         function toggleBonus(bonus) {
-            if (bonus === 'x2') {
-                x2Active = !x2Active;
-                document.getElementById('x2Btn').classList.toggle('active');
-            } else if (bonus === 'vip') {
-                vipActive = !vipActive;
-                document.getElementById('vipBtn').classList.toggle('active');
-            }
-            updateBPCounter();
-            renderChapters();
+            if (bonus === 'x2') { x2Active = !x2Active; document.getElementById('x2Btn').classList.toggle('active'); }
+            else if (bonus === 'vip') { vipActive = !vipActive; document.getElementById('vipBtn').classList.toggle('active'); }
+            renderChapters(); updateBPCounter();
         }
-
-        // ==================== Тема ====================
-        function toggleTheme() {
-            isDarkTheme = !isDarkTheme;
-            if (isDarkTheme) {
-                document.body.classList.remove('light-theme');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.body.classList.add('light-theme');
-                localStorage.setItem('theme', 'light');
-            }
-            updateThemeIcon();
-        }
-        function updateThemeIcon() {
-            document.getElementById('themeBtn').textContent = isDarkTheme ? '🌞' : '🌙';
-        }
-
-        // ==================== Фильтры ====================
-        function setFilter(filter) {
-            currentFilter = filter;
-            localStorage.setItem('filter', filter);
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.filter === filter);
-            });
-            renderChapters();
-        }
-
-        function filterTask(task) {
+        function setFilter(filter) { currentFilter = filter; localStorage.setItem('filter', filter); renderChapters(); }
+        function filterTask(t) {
             if (currentFilter === 'all') return true;
-            if (currentFilter === 'active') {
-                if (task.count) return task.current < task.count;
-                return !task.done;
-            }
-            if (currentFilter === 'completed') {
-                if (task.count) return task.current >= task.count;
-                return task.done;
-            }
+            if (currentFilter === 'active') return t.count ? t.current < t.count : !t.done;
+            if (currentFilter === 'completed') return t.count ? t.current >= t.count : t.done;
             return true;
         }
-
-        // ==================== Restart и Hard Restart ====================
         function restartTasks() {
-            if (confirm('Сбросить все галочки и счётчики? Прогресс будет потерян.')) {
-                chapters.forEach(chapter => {
-                    chapter.tasks.forEach(task => {
-                        if (task.count) {
-                            task.current = 0;
-                        } else {
-                            task.done = false;
-                        }
-                    });
-                });
-                renderChapters();
-                updateAdminUI();
-                saveToStorage();
-                alert('Готово! Все задачи сброшены.');
+            if (confirm('Сбросить все галочки и счётчики?')) {
+                chapters.forEach(ch => ch.tasks.forEach(t => { if (t.count) t.current = 0; else t.done = false; }));
+                renderChapters(); updateAdminUI(); saveToStorage(); alert('Готово!');
             }
         }
-
         function hardRestartTasks() {
             if (confirm('ПОЛНЫЙ СБРОС: Вернуть всё к состоянию по умолчанию?')) {
-                localStorage.removeItem('chapters'); // Удаляем сохранённые данные
-                chapters = JSON.parse(JSON.stringify(DEFAULT_CHAPTERS)); // Глубокая копия шаблона
-                renderChapters();
-                updateAdminUI();
-                alert('Готово! Начальный список восстановлен (все скрытые задания возвращены).');
+                localStorage.removeItem('chapters');
+                chapters = JSON.parse(JSON.stringify(DEFAULT_CHAPTERS));
+                renderChapters(); updateAdminUI(); alert('Готово!');
             }
         }
+        function saveToStorage() { localStorage.setItem('chapters', JSON.stringify(chapters)); }
 
-        // ==================== Админка ====================
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && (e.key === '`' || e.key === 'ё' || e.key === '~')) {
-                e.preventDefault();
-                if (!isAdmin) {
-                    document.getElementById('passwordModal').classList.add('visible');
-                    document.getElementById('passwordInput').focus();
-                } else {
-                    toggleAdminPanel();
-                }
-            }
-        });
-
-        function checkPassword() {
-            const input = document.getElementById('passwordInput').value;
-            if (input === ADMIN_PASSWORD) {
-                document.getElementById('passwordModal').classList.remove('visible');
-                isAdmin = true;
-                document.body.classList.add('admin-mode');
-                showAdminPanel();
-                renderChapters();
-                updateAdminUI();
-            } else {
-                alert('Неверный пароль!');
-            }
-        }
-
-        function toggleAdminPanel() {
-            const panel = document.getElementById('adminPanel');
-            panel.classList.toggle('visible');
-            if (panel.classList.contains('visible')) updateAdminUI();
-        }
-        function showAdminPanel() {
-            document.getElementById('adminPanel').classList.add('visible');
-            updateAdminUI();
-        }
-        function hideAdminPanel() {
-            document.getElementById('adminPanel').classList.remove('visible');
-        }
-        function adminLogout() {
-            isAdmin = false;
-            document.body.classList.remove('admin-mode');
-            hideAdminPanel();
-            renderChapters();
-        }
-
-        function updateAdminUI() {
-            updateChaptersList();
-            updateChapterSelects();
-            document.getElementById('importExportData').value = JSON.stringify(chapters, null, 2);
-        }
-
-        function updateChaptersList() {
-            const list = document.getElementById('chaptersList-admin');
-            list.innerHTML = chapters.map(ch => `
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px; padding: 5px; background: #222; border-radius: 4px;">
-                    <span style="flex: 1; color: #fff;">${ch.name} (${ch.tasks.length})</span>
-                    ${chapters.length > 1 ? 
-                        `<button class="admin-btn-small delete" onclick="deleteChapter('${ch.id}')" style="width: 24px;">×</button>` : 
-                        ''}
-                </div>
-            `).join('');
-        }
-
-        function updateChapterSelects() {
-            const options = chapters.map(ch => `<option value="${ch.id}">${ch.name}</option>`).join('');
-            document.getElementById('taskChapter').innerHTML = options;
-            document.getElementById('bulkChapter').innerHTML = options;
-            document.getElementById('moveChapterSelect').innerHTML = options;
-            document.getElementById('editTaskChapter').innerHTML = options;
-        }
-
-        // ==================== Главы ====================
-        function addChapter() {
-            const name = document.getElementById('newChapterName').value.trim();
-            if (name) {
-                chapters.push({
-                    id: generateId(),
-                    name: name,
-                    collapsed: false,
-                    hidden: false,
-                    tasks: []
-                });
-                document.getElementById('newChapterName').value = '';
-                updateAdminUI();
-                renderChapters();
-                saveToStorage();
-            }
-        }
-
-        function deleteChapter(chapterId) {
-            if (chapters.length <= 1) {
-                alert('Нельзя удалить последнюю главу!');
-                return;
-            }
-            chapters = chapters.filter(ch => ch.id !== chapterId);
-            updateAdminUI();
-            renderChapters();
-            saveToStorage();
-        }
-
-        function editChapterTitle(chapterId, newTitle) {
-            const chapter = chapters.find(ch => ch.id === chapterId);
-            if (chapter) {
-                chapter.name = newTitle;
-                renderChapters();
-                updateAdminUI();
-                saveToStorage();
-            }
-        }
-
-        // ==================== Задачи ====================
-        function adminAddTodo() {
-            const chapterId = document.getElementById('taskChapter').value;
-            const text = document.getElementById('adminNewTodo').value.trim();
-            const count = parseInt(document.getElementById('taskCount').value) || 1;
-            const bpValue = parseInt(document.getElementById('taskBP').value) || 0;
-            if (text && chapterId) {
-                const chapter = chapters.find(ch => ch.id === chapterId);
-                const task = {
-                    id: generateId(),
-                    text: text,
-                    description: '',
-                    bpValue: bpValue,
-                    hidden: false
-                };
-                if (count > 1) {
-                    task.count = count;
-                    task.current = 0;
-                } else {
-                    task.done = false;
-                }
-                chapter.tasks.push(task);
-                document.getElementById('adminNewTodo').value = '';
-                document.getElementById('taskBP').value = '0';
-                renderChapters();
-                updateAdminUI();
-                saveToStorage();
-            }
-        }
-
-        function adminAddBulk() {
-            const chapterId = document.getElementById('bulkChapter').value;
-            const text = document.getElementById('bulkTodos').value;
-            const lines = text.split('\n').filter(l => l.trim());
-            const chapter = chapters.find(ch => ch.id === chapterId);
-            lines.forEach(line => {
-                const parts = line.split('|').map(s => s.trim());
-                let taskText = parts[0];
-                let count = 1;
-                let bpValue = 0;
-                if (parts.length >= 2) count = parseInt(parts[1]) || 1;
-                if (parts.length >= 3) bpValue = parseInt(parts[2]) || 0;
-                const task = {
-                    id: generateId(),
-                    text: taskText,
-                    description: '',
-                    bpValue: bpValue,
-                    hidden: false
-                };
-                if (count > 1) {
-                    task.count = count;
-                    task.current = 0;
-                } else {
-                    task.done = false;
-                }
-                chapter.tasks.push(task);
-            });
-            document.getElementById('bulkTodos').value = '';
-            renderChapters();
-            updateAdminUI();
-            saveToStorage();
-        }
-
-        function deleteTask(chapterId, taskId) {
-            const chapter = chapters.find(ch => ch.id === chapterId);
-            if (chapter) {
-                chapter.tasks = chapter.tasks.filter(t => t.id !== taskId);
-                renderChapters();
-                updateAdminUI();
-                saveToStorage();
-            }
-        }
-
-        function adjustCounter(chapterId, taskId, delta) {
-            const chapter = chapters.find(ch => ch.id === chapterId);
-            const task = chapter?.tasks.find(t => t.id === taskId);
-            if (task && task.count !== undefined) {
-                let newValue = (task.current || 0) + delta;
-                if (newValue < 0) newValue = 0;
-                if (newValue > task.count) newValue = task.count;
-                task.current = newValue;
-                renderChapters();
-                updateBPCounter();
-                saveToStorage();
-            }
-        }
-
-        function toggleTask(chapterId, taskId) {
-            const chapter = chapters.find(ch => ch.id === chapterId);
-            const task = chapter?.tasks.find(t => t.id === taskId);
-            if (task) {
-                if (task.count) {
-                    task.current = (task.current >= task.count) ? 0 : task.count;
-                } else {
-                    task.done = !task.done;
-                }
-                renderChapters();
-                updateBPCounter();
-                saveToStorage();
-            }
-        }
-
-        function toggleDescription(taskId) {
-            const desc = document.getElementById(`desc-${taskId}`);
-            if (desc) desc.classList.toggle('visible');
-        }
-
-        // ==================== Редактирование задачи ====================
-        function openEditTaskModal(chapterId, taskId) {
-            const chapter = chapters.find(ch => ch.id === chapterId);
-            const task = chapter?.tasks.find(t => t.id === taskId);
-            if (task) {
-                currentEditTask = { chapterId, taskId };
-                document.getElementById('editTaskText').value = task.text || '';
-                document.getElementById('editTaskCount').value = task.count || 1;
-                document.getElementById('editTaskBP').value = task.bpValue || 0;
-                document.getElementById('editTaskDescription').value = task.description || '';
-                document.getElementById('editTaskChapter').value = chapterId;
-                document.getElementById('editTaskModal').classList.add('visible');
-            }
-        }
-
-        function closeEditModal() {
-            document.getElementById('editTaskModal').classList.remove('visible');
-            currentEditTask = null;
-        }
-
-        function saveTaskEdit() {
-            if (!currentEditTask) return;
-            const { chapterId, taskId } = currentEditTask;
-            const oldChapter = chapters.find(ch => ch.id === chapterId);
-            const task = oldChapter?.tasks.find(t => t.id === taskId);
-            if (!task) return;
-
-            const newChapterId = document.getElementById('editTaskChapter').value;
-            const newText = document.getElementById('editTaskText').value.trim();
-            const newCount = parseInt(document.getElementById('editTaskCount').value) || 1;
-            const newBP = parseInt(document.getElementById('editTaskBP').value) || 0;
-            const newDescription = document.getElementById('editTaskDescription').value;
-
-            if (!newText) return;
-
-            task.text = newText;
-            task.bpValue = newBP;
-            task.description = newDescription;
-
-            if (newCount > 1) {
-                if (!task.count) {
-                    task.count = newCount;
-                    task.current = 0;
-                    delete task.done;
-                } else {
-                    task.count = newCount;
-                    if (task.current > newCount) task.current = newCount;
-                }
-            } else {
-                if (task.count) {
-                    delete task.count;
-                    delete task.current;
-                }
-                task.done = false;
-            }
-
-            if (newChapterId !== chapterId) {
-                const newChapter = chapters.find(ch => ch.id === newChapterId);
-                oldChapter.tasks = oldChapter.tasks.filter(t => t.id !== taskId);
-                newChapter.tasks.push(task);
-            }
-
-            renderChapters();
-            updateAdminUI();
-            saveToStorage();
-            closeEditModal();
-        }
-
-        // ==================== Перемещение через меню ====================
-        function openMoveMenu(chapterId, taskId, button) {
-            currentMoveTask = { chapterId, taskId };
-            const menu = document.getElementById('moveMenu');
-            const rect = button.getBoundingClientRect();
-            menu.style.top = rect.bottom + window.scrollY + 'px';
-            menu.style.left = rect.left + 'px';
-            menu.classList.add('visible');
-            updateChapterSelects();
-            setTimeout(() => {
-                document.addEventListener('click', closeMoveMenuOnClickOutside);
-            }, 100);
-        }
-
-        function closeMoveMenuOnClickOutside(e) {
-            const menu = document.getElementById('moveMenu');
-            if (!menu.contains(e.target) && !e.target.classList.contains('move')) {
-                menu.classList.remove('visible');
-                document.removeEventListener('click', closeMoveMenuOnClickOutside);
-            }
-        }
-
-        function moveTask() {
-            if (!currentMoveTask) return;
-            const targetChapterId = document.getElementById('moveChapterSelect').value;
-            const sourceChapter = chapters.find(ch => ch.id === currentMoveTask.chapterId);
-            const targetChapter = chapters.find(ch => ch.id === targetChapterId);
-            const task = sourceChapter?.tasks.find(t => t.id === currentMoveTask.taskId);
-            if (sourceChapter && targetChapter && task && sourceChapter.id !== targetChapter.id) {
-                sourceChapter.tasks = sourceChapter.tasks.filter(t => t.id !== currentMoveTask.taskId);
-                targetChapter.tasks.push(task);
-                renderChapters();
-                updateAdminUI();
-                saveToStorage();
-            }
-            document.getElementById('moveMenu').classList.remove('visible');
-        }
-
-        // ==================== Видимость ====================
-        function openVisibilityModal() {
-            if (isAdmin) return;
-            renderVisibilityList();
-            document.getElementById('visibilityModal').classList.add('visible');
-        }
-
-        function closeVisibilityModal() {
-            document.getElementById('visibilityModal').classList.remove('visible');
-        }
-
-        function renderVisibilityList() {
-            const list = document.getElementById('visibilityList');
-            list.innerHTML = '';
-            chapters.forEach(chapter => {
-                const chapterItem = document.createElement('div');
-                chapterItem.className = 'visibility-item chapter';
-                chapterItem.innerHTML = `
-                    <span class="item-name">📁 ${chapter.name}</span>
-                    <button class="eye-btn" onclick="toggleChapterVisibility('${chapter.id}')">${chapter.hidden ? '👁️‍🗨️' : '👁️'}</button>
-                `;
-                list.appendChild(chapterItem);
-                chapter.tasks.forEach(task => {
-                    const taskItem = document.createElement('div');
-                    taskItem.className = 'visibility-item';
-                    taskItem.innerHTML = `
-                        <span class="item-name task">↳ ${task.text}</span>
-                        <button class="eye-btn" onclick="toggleTaskVisibility('${chapter.id}', '${task.id}')">${task.hidden ? '👁️‍🗨️' : '👁️'}</button>
-                    `;
-                    list.appendChild(taskItem);
-                });
-            });
-        }
-
-        function toggleChapterVisibility(chapterId) {
-            const chapter = chapters.find(ch => ch.id === chapterId);
-            if (chapter) {
-                chapter.hidden = !chapter.hidden;
-                renderVisibilityList();
-                renderChapters();
-                saveToStorage();
-            }
-        }
-
-        function toggleTaskVisibility(chapterId, taskId) {
-            const chapter = chapters.find(ch => ch.id === chapterId);
-            const task = chapter?.tasks.find(t => t.id === taskId);
-            if (task) {
-                task.hidden = !task.hidden;
-                renderVisibilityList();
-                renderChapters();
-                saveToStorage();
-            }
-        }
-
-        function showAllVisibility() {
-            chapters.forEach(ch => {
-                ch.hidden = false;
-                ch.tasks.forEach(t => t.hidden = false);
-            });
-            renderVisibilityList();
-            renderChapters();
-            saveToStorage();
-        }
-
-        // ==================== Отрисовка ====================
+        // ==================== Рендеринг ====================
         function renderChapters() {
             const container = document.getElementById('chaptersList');
             container.innerHTML = '';
-
-            chapters.forEach(chapter => {
-                if (chapter.hidden) return;
-
-                const chapterDiv = document.createElement('div');
-                chapterDiv.className = `chapter ${chapter.collapsed ? 'collapsed' : ''}`;
-
+            chapters.forEach(ch => {
+                if (ch.hidden) return;
+                const chDiv = document.createElement('div');
+                chDiv.className = `chapter ${ch.collapsed ? 'collapsed' : ''}`;
                 const header = document.createElement('div');
                 header.className = 'chapter-header';
-                const titleSpan = document.createElement('span');
-                titleSpan.className = 'chapter-title';
-                titleSpan.textContent = chapter.name;
-                if (isAdmin) {
-                    titleSpan.ondblclick = () => {
-                        const newTitle = prompt('Введите новое название главы:', chapter.name);
-                        if (newTitle) editChapterTitle(chapter.id, newTitle);
-                    };
-                }
-
-                const total = chapter.tasks.filter(t => !t.hidden).length;
-                const completed = chapter.tasks.filter(t => !t.hidden && (
-                    t.count ? t.current >= t.count : t.done
-                )).length;
-
-                const progress = document.createElement('span');
-                progress.className = 'chapter-progress';
-                progress.textContent = `[${completed}/${total}]`;
-
-                const arrow = document.createElement('span');
-                arrow.className = 'chapter-arrow';
-                arrow.textContent = '▼';
-
-                header.onclick = (e) => {
-                    if (!e.target.classList.contains('chapter-title')) {
-                        chapter.collapsed = !chapter.collapsed;
-                        renderChapters();
-                        saveToStorage();
+                const title = document.createElement('span');
+                title.className = 'chapter-title';
+                title.textContent = ch.name;
+                if (isAdmin) title.ondblclick = () => { let n = prompt('Новое название:', ch.name); if (n) editChapterTitle(ch.id, n); };
+                const total = ch.tasks.filter(t => !t.hidden).length;
+                const completed = ch.tasks.filter(t => !t.hidden && (t.count ? t.current >= t.count : t.done)).length;
+                const prog = document.createElement('span'); prog.className = 'chapter-progress'; prog.textContent = `[${completed}/${total}]`;
+                const arrow = document.createElement('span'); arrow.className = 'chapter-arrow'; arrow.textContent = '▼';
+                header.onclick = (e) => { if (!e.target.classList.contains('chapter-title')) { ch.collapsed = !ch.collapsed; renderChapters(); saveToStorage(); } };
+                header.appendChild(title); header.appendChild(prog); header.appendChild(arrow);
+                const tasksDiv = document.createElement('div'); tasksDiv.className = 'chapter-tasks';
+                ch.tasks.forEach(t => {
+                    if (t.hidden || !filterTask(t)) return;
+                    const tDiv = document.createElement('div');
+                    const tItem = document.createElement('div'); tItem.className = `todo-item ${(t.count ? t.current >= t.count : t.done) ? 'done' : ''}`;
+                    const main = document.createElement('div'); main.className = 'todo-main';
+                    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'todo-checkbox'; cb.checked = t.count ? t.current >= t.count : t.done;
+                    cb.onchange = () => { if (t.count) t.current = t.current >= t.count ? 0 : t.count; else t.done = !t.done; renderChapters(); updateBPCounter(); saveToStorage(); };
+                    const textSpan = document.createElement('span'); textSpan.className = 'todo-text'; textSpan.textContent = t.text;
+                    if (!isAdmin) textSpan.onclick = () => { let desc = document.getElementById(`desc-${t.id}`); if (desc) desc.classList.toggle('visible'); };
+                    main.appendChild(cb); main.appendChild(textSpan);
+                    if (t.count) {
+                        const counter = document.createElement('div'); counter.className = 'todo-counter';
+                        const minus = document.createElement('button'); minus.textContent = '−'; minus.className = 'counter-btn minus'; minus.onclick = (e) => { e.stopPropagation(); let nv = (t.current || 0) - 1; if (nv < 0) nv = 0; t.current = nv; renderChapters(); updateBPCounter(); saveToStorage(); };
+                        const val = document.createElement('span'); val.className = 'counter-value'; val.textContent = `${t.current || 0}/${t.count}`;
+                        const plus = document.createElement('button'); plus.textContent = '+'; plus.className = 'counter-btn'; plus.onclick = (e) => { e.stopPropagation(); let nv = (t.current || 0) + 1; if (nv > t.count) nv = t.count; t.current = nv; renderChapters(); updateBPCounter(); saveToStorage(); };
+                        counter.appendChild(minus); counter.appendChild(val); counter.appendChild(plus); main.appendChild(counter);
                     }
-                };
-                header.appendChild(titleSpan);
-                header.appendChild(progress);
-                header.appendChild(arrow);
-
-                const tasksDiv = document.createElement('div');
-                tasksDiv.className = 'chapter-tasks';
-
-                chapter.tasks.forEach(task => {
-                    if (task.hidden || !filterTask(task)) return;
-
-                    const taskDiv = document.createElement('div');
-                    const taskItem = document.createElement('div');
-                    taskItem.className = `todo-item ${(task.count ? task.current >= task.count : task.done) ? 'done' : ''}`;
-
-                    const mainDiv = document.createElement('div');
-                    mainDiv.className = 'todo-main';
-
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.className = 'todo-checkbox';
-                    checkbox.checked = task.count ? task.current >= task.count : task.done;
-                    checkbox.onchange = (e) => {
-                        e.stopPropagation();
-                        toggleTask(chapter.id, task.id);
-                    };
-
-                    const textSpan = document.createElement('span');
-                    textSpan.className = 'todo-text';
-                    textSpan.textContent = task.text;
-                    if (!isAdmin) {
-                        textSpan.onclick = () => toggleDescription(task.id);
-                    }
-
-                    mainDiv.appendChild(checkbox);
-                    mainDiv.appendChild(textSpan);
-
-                    if (task.count) {
-                        const counterDiv = document.createElement('div');
-                        counterDiv.className = 'todo-counter';
-                        
-                        const minusBtn = document.createElement('button');
-                        minusBtn.className = 'counter-btn minus';
-                        minusBtn.textContent = '−';
-                        minusBtn.onclick = (e) => {
-                            e.stopPropagation();
-                            adjustCounter(chapter.id, task.id, -1);
-                        };
-                        
-                        const valueSpan = document.createElement('span');
-                        valueSpan.className = 'counter-value';
-                        valueSpan.textContent = `${task.current || 0}/${task.count}`;
-                        
-                        const plusBtn = document.createElement('button');
-                        plusBtn.className = 'counter-btn';
-                        plusBtn.textContent = '+';
-                        plusBtn.onclick = (e) => {
-                            e.stopPropagation();
-                            adjustCounter(chapter.id, task.id, 1);
-                        };
-                        
-                        counterDiv.appendChild(minusBtn);
-                        counterDiv.appendChild(valueSpan);
-                        counterDiv.appendChild(plusBtn);
-                        mainDiv.appendChild(counterDiv);
-                    }
-
-                    if (task.bpValue > 0) {
-                        let displayBp = task.bpValue;
-                        
-                        if (task.isAccumulative && task.count && task.current > 0) {
-                            displayBp = task.current * task.bpValue;
-                        }
-                        
-                        let multiplier = 1;
-                        if (x2Active) multiplier *= 2;
-                        if (vipActive) multiplier *= 2;
-                        displayBp *= multiplier;
-                        
-                        const bpSpan = document.createElement('span');
-                        bpSpan.className = 'todo-bp';
-                        bpSpan.textContent = `+${displayBp}`;
-                        mainDiv.appendChild(bpSpan);
-                    }
-
+                    let displayBp = t.bpValue;
+                    if (t.isAccumulative && t.count && t.current > 0) displayBp = t.current * t.bpValue;
+                    let mult = 1; if (x2Active) mult *= 2; if (vipActive) mult *= 2; displayBp *= mult;
+                    if (displayBp > 0) { const bpSpan = document.createElement('span'); bpSpan.className = 'todo-bp'; bpSpan.textContent = `+${displayBp}`; main.appendChild(bpSpan); }
                     if (isAdmin) {
-                        const controls = document.createElement('div');
-                        controls.className = 'admin-controls';
-                        
-                        const editBtn = document.createElement('button');
-                        editBtn.className = 'admin-btn-small edit';
-                        editBtn.innerHTML = '✏️';
-                        editBtn.onclick = (e) => {
-                            e.stopPropagation();
-                            openEditTaskModal(chapter.id, task.id);
-                        };
-                        
-                        const moveBtn = document.createElement('button');
-                        moveBtn.className = 'admin-btn-small move';
-                        moveBtn.innerHTML = '↗️';
-                        moveBtn.onclick = (e) => {
-                            e.stopPropagation();
-                            openMoveMenu(chapter.id, task.id, moveBtn);
-                        };
-                        
-                        const deleteBtn = document.createElement('button');
-                        deleteBtn.className = 'admin-btn-small delete';
-                        deleteBtn.innerHTML = '×';
-                        deleteBtn.onclick = (e) => {
-                            e.stopPropagation();
-                            deleteTask(chapter.id, task.id);
-                        };
-                        
-                        controls.appendChild(editBtn);
-                        controls.appendChild(moveBtn);
-                        controls.appendChild(deleteBtn);
-                        mainDiv.appendChild(controls);
+                        const controls = document.createElement('div'); controls.className = 'admin-controls';
+                        const edit = document.createElement('button'); edit.textContent = '✏️'; edit.className = 'admin-btn-small edit'; edit.onclick = (e) => { e.stopPropagation(); openEditTaskModal(ch.id, t.id); };
+                        const move = document.createElement('button'); move.textContent = '↗️'; move.className = 'admin-btn-small move'; move.onclick = (e) => { e.stopPropagation(); openMoveMenu(ch.id, t.id, move); };
+                        const del = document.createElement('button'); del.textContent = '×'; del.className = 'admin-btn-small delete'; del.onclick = (e) => { e.stopPropagation(); deleteTask(ch.id, t.id); };
+                        controls.appendChild(edit); controls.appendChild(move); controls.appendChild(del); main.appendChild(controls);
                     }
-
-                    taskDiv.appendChild(mainDiv);
-
-                    if (task.description) {
-                        const descDiv = document.createElement('div');
-                        descDiv.id = `desc-${task.id}`;
-                        descDiv.className = 'todo-description';
-                        if (isAdmin) descDiv.classList.add('visible');
-                        descDiv.textContent = task.description;
-                        taskDiv.appendChild(descDiv);
+                    tItem.appendChild(main);
+                    if (t.description) {
+                        const desc = document.createElement('div'); desc.id = `desc-${t.id}`; desc.className = 'todo-description'; if (isAdmin) desc.classList.add('visible'); desc.textContent = t.description; tItem.appendChild(desc);
                     }
-
-                    tasksDiv.appendChild(taskDiv);
+                    tDiv.appendChild(tItem);
+                    tasksDiv.appendChild(tDiv);
                 });
-
-                chapterDiv.appendChild(header);
-                chapterDiv.appendChild(tasksDiv);
-                container.appendChild(chapterDiv);
+                chDiv.appendChild(header); chDiv.appendChild(tasksDiv); container.appendChild(chDiv);
             });
-
-            saveToStorage();
-            updateBPCounter();
-            if (isAdmin) {
-                setTimeout(initDragAndDrop, 100);
-            }
-        }
-
-        function initDragAndDrop() {
-            document.querySelectorAll('.chapter-tasks').forEach(tasksContainer => {
-                new Sortable(tasksContainer, {
-                    group: 'tasks',
-                    animation: 200,
-                    ghostClass: 'todo-item-ghost',
-                    dragClass: 'todo-item-drag',
-                    onEnd: function() {
-                        saveToStorage();
-                    }
-                });
-            });
+            saveToStorage(); updateBPCounter();
+            if (isAdmin) setTimeout(() => { document.querySelectorAll('.chapter-tasks').forEach(tc => new Sortable(tc, { group: 'tasks', animation: 200, onEnd: () => saveToStorage() })); }, 100);
         }
 
         // ==================== Админ функции ====================
-        function adminCollapseAllDone() {
-            chapters.forEach(ch => {
-                const allDone = ch.tasks.every(t => 
-                    t.count ? t.current >= t.count : t.done
-                );
-                if (allDone && ch.tasks.length > 0) ch.collapsed = true;
-            });
+        function addChapter() { let n = document.getElementById('newChapterName').value.trim(); if (n) { chapters.push({ id: generateId(), name: n, collapsed: false, hidden: false, tasks: [] }); document.getElementById('newChapterName').value = ''; renderChapters(); updateAdminUI(); saveToStorage(); } }
+        function deleteChapter(id) { if (chapters.length <= 1) { alert('Нельзя удалить последнюю главу!'); return; } chapters = chapters.filter(ch => ch.id !== id); renderChapters(); updateAdminUI(); saveToStorage(); }
+        function editChapterTitle(id, newTitle) { let ch = chapters.find(c => c.id === id); if (ch) { ch.name = newTitle; renderChapters(); updateAdminUI(); saveToStorage(); } }
+        function deleteTask(chId, tId) { let ch = chapters.find(c => c.id === chId); if (ch) { ch.tasks = ch.tasks.filter(t => t.id !== tId); renderChapters(); updateAdminUI(); saveToStorage(); } }
+        function adminAddTodo() { let chId = document.getElementById('taskChapter').value, text = document.getElementById('adminNewTodo').value.trim(), count = parseInt(document.getElementById('taskCount').value) || 1, bp = parseInt(document.getElementById('taskBP').value) || 0; if (text && chId) { let ch = chapters.find(c => c.id === chId); let task = { id: generateId(), text: text, description: '', bpValue: bp, hidden: false }; if (count > 1) { task.count = count; task.current = 0; } else task.done = false; ch.tasks.push(task); document.getElementById('adminNewTodo').value = ''; document.getElementById('taskBP').value = '0'; renderChapters(); updateAdminUI(); saveToStorage(); } }
+        function adminAddBulk() { let chId = document.getElementById('bulkChapter').value, text = document.getElementById('bulkTodos').value, lines = text.split('\n').filter(l => l.trim()), ch = chapters.find(c => c.id === chId); lines.forEach(l => { let parts = l.split('|').map(s => s.trim()), txt = parts[0], cnt = parts.length >= 2 ? parseInt(parts[1]) || 1 : 1, bp = parts.length >= 3 ? parseInt(parts[2]) || 0 : 0, task = { id: generateId(), text: txt, description: '', bpValue: bp, hidden: false }; if (cnt > 1) { task.count = cnt; task.current = 0; } else task.done = false; ch.tasks.push(task); }); document.getElementById('bulkTodos').value = ''; renderChapters(); updateAdminUI(); saveToStorage(); }
+        function openEditTaskModal(chId, tId) { let ch = chapters.find(c => c.id === chId), t = ch?.tasks.find(t => t.id === tId); if (t) { currentEditTask = { chapterId: chId, taskId: tId }; document.getElementById('editTaskText').value = t.text || ''; document.getElementById('editTaskCount').value = t.count || 1; document.getElementById('editTaskBP').value = t.bpValue || 0; document.getElementById('editTaskDescription').value = t.description || ''; document.getElementById('editTaskChapter').value = chId; document.getElementById('editTaskModal').classList.add('visible'); } }
+        function closeEditModal() { document.getElementById('editTaskModal').classList.remove('visible'); currentEditTask = null; }
+        function saveTaskEdit() { if (!currentEditTask) return; let { chapterId, taskId } = currentEditTask; let oldCh = chapters.find(c => c.id === chapterId); let t = oldCh?.tasks.find(t => t.id === taskId); if (!t) return; let newChId = document.getElementById('editTaskChapter').value, newText = document.getElementById('editTaskText').value.trim(), newCnt = parseInt(document.getElementById('editTaskCount').value) || 1, newBp = parseInt(document.getElementById('editTaskBP').value) || 0, newDesc = document.getElementById('editTaskDescription').value; if (!newText) return; t.text = newText; t.bpValue = newBp; t.description = newDesc; if (newCnt > 1) { if (!t.count) { t.count = newCnt; t.current = 0; delete t.done; } else { t.count = newCnt; if (t.current > newCnt) t.current = newCnt; } } else { if (t.count) { delete t.count; delete t.current; } t.done = false; } if (newChId !== chapterId) { let newCh = chapters.find(c => c.id === newChId); oldCh.tasks = oldCh.tasks.filter(t => t.id !== taskId); newCh.tasks.push(t); } renderChapters(); updateAdminUI(); saveToStorage(); closeEditModal(); }
+        function openMoveMenu(chId, tId, btn) { currentMoveTask = { chapterId: chId, taskId: tId }; let menu = document.getElementById('moveMenu'); let rect = btn.getBoundingClientRect(); menu.style.top = rect.bottom + window.scrollY + 'px'; menu.style.left = rect.left + 'px'; menu.classList.add('visible'); updateChapterSelects(); setTimeout(() => document.addEventListener('click', function close(e) { if (!menu.contains(e.target) && !e.target.classList.contains('move')) { menu.classList.remove('visible'); document.removeEventListener('click', close); } }), 100); }
+        function moveTask() { if (!currentMoveTask) return; let targetId = document.getElementById('moveChapterSelect').value; let source = chapters.find(c => c.id === currentMoveTask.chapterId); let target = chapters.find(c => c.id === targetId); let task = source?.tasks.find(t => t.id === currentMoveTask.taskId); if (source && target && task && source.id !== target.id) { source.tasks = source.tasks.filter(t => t.id !== currentMoveTask.taskId); target.tasks.push(task); renderChapters(); updateAdminUI(); saveToStorage(); } document.getElementById('moveMenu').classList.remove('visible'); }
+        function updateChapterSelects() { let opts = chapters.map(ch => `<option value="${ch.id}">${ch.name}</option>`).join(''); document.getElementById('taskChapter').innerHTML = opts; document.getElementById('bulkChapter').innerHTML = opts; document.getElementById('moveChapterSelect').innerHTML = opts; document.getElementById('editTaskChapter').innerHTML = opts; }
+        function updateAdminUI() { updateChaptersList(); updateChapterSelects(); document.getElementById('importExportData').value = JSON.stringify(chapters, null, 2); }
+        function updateChaptersList() { document.getElementById('chaptersList-admin').innerHTML = chapters.map(ch => `<div style="display:flex; gap:10px; margin-bottom:5px; padding:5px; background:#222; border-radius:4px;"><span style="flex:1;">${ch.name} (${ch.tasks.length})</span>${chapters.length > 1 ? `<button class="admin-btn-small delete" onclick="deleteChapter('${ch.id}')" style="width:24px;">×</button>` : ''}</div>`).join(''); }
+        function adminCollapseAllDone() { chapters.forEach(ch => { let all = ch.tasks.every(t => t.count ? t.current >= t.count : t.done); if (all && ch.tasks.length) ch.collapsed = true; }); renderChapters(); saveToStorage(); }
+        function adminExpandAll() { chapters.forEach(ch => ch.collapsed = false); renderChapters(); saveToStorage(); }
+        function adminDeleteAllDone() { chapters.forEach(ch => { ch.tasks = ch.tasks.filter(t => t.count ? t.current < t.count : !t.done); }); renderChapters(); updateAdminUI(); saveToStorage(); }
+        function adminClearAll() { if (confirm('Удалить всё?')) { chapters = [{ id: generateId(), name: 'Основные задачи', collapsed: false, hidden: false, tasks: [] }]; renderChapters(); updateAdminUI(); saveToStorage(); } }
+        function adminExport() { let data = document.getElementById('importExportData'); data.select(); navigator.clipboard.writeText(data.value).then(() => alert('Скопировано!')); }
+        function adminImport() { let data = prompt('Вставьте скопированный список:'); if (data) { try { chapters = JSON.parse(data); chapters.forEach(ch => { if (ch.hidden === undefined) ch.hidden = false; ch.tasks.forEach(t => { if (t.hidden === undefined) t.hidden = false; }); }); renderChapters(); updateAdminUI(); saveToStorage(); alert('Импортировано!'); } catch (e) { alert('Ошибка!'); } } }
+        function openVisibilityModal() { if (isAdmin) return; renderVisibilityList(); document.getElementById('visibilityModal').classList.add('visible'); }
+        function closeVisibilityModal() { document.getElementById('visibilityModal').classList.remove('visible'); }
+        function renderVisibilityList() { let list = document.getElementById('visibilityList'); list.innerHTML = ''; chapters.forEach(ch => { let chItem = document.createElement('div'); chItem.className = 'visibility-item chapter'; chItem.innerHTML = `<span>📁 ${ch.name}</span><button class="eye-btn" onclick="toggleChapterVisibility('${ch.id}')">${ch.hidden ? '👁️‍🗨️' : '👁️'}</button>`; list.appendChild(chItem); ch.tasks.forEach(t => { let tItem = document.createElement('div'); tItem.className = 'visibility-item'; tItem.innerHTML = `<span style="margin-left:20px;">↳ ${t.text}</span><button class="eye-btn" onclick="toggleTaskVisibility('${ch.id}','${t.id}')">${t.hidden ? '👁️‍🗨️' : '👁️'}</button>`; list.appendChild(tItem); }); }); }
+        function toggleChapterVisibility(id) { let ch = chapters.find(c => c.id === id); if (ch) { ch.hidden = !ch.hidden; renderVisibilityList(); renderChapters(); saveToStorage(); } }
+        function toggleTaskVisibility(chId, tId) { let ch = chapters.find(c => c.id === chId); let t = ch?.tasks.find(t => t.id === tId); if (t) { t.hidden = !t.hidden; renderVisibilityList(); renderChapters(); saveToStorage(); } }
+        function showAllVisibility() { chapters.forEach(ch => { ch.hidden = false; ch.tasks.forEach(t => t.hidden = false); }); renderVisibilityList(); renderChapters(); saveToStorage(); }
+
+        // ==================== Админка вход ====================
+        function checkPassword() { if (document.getElementById('passwordInput').value === ADMIN_PASSWORD) { document.getElementById('passwordModal').classList.remove('visible'); isAdmin = true; document.body.classList.add('admin-mode'); showAdminPanel(); renderChapters(); updateAdminUI(); } else alert('Неверный пароль!'); }
+        function toggleAdminPanel() { let p = document.getElementById('adminPanel'); p.classList.toggle('visible'); if (p.classList.contains('visible')) updateAdminUI(); }
+        function showAdminPanel() { document.getElementById('adminPanel').classList.add('visible'); updateAdminUI(); }
+        function adminLogout() { isAdmin = false; document.body.classList.remove('admin-mode'); hideAdminPanel(); renderChapters(); }
+        function hideAdminPanel() { document.getElementById('adminPanel').classList.remove('visible'); }
+        document.addEventListener('keydown', function(e) { if (e.ctrlKey && (e.key === '`' || e.key === 'ё' || e.key === '~')) { e.preventDefault(); if (!isAdmin) document.getElementById('passwordModal').classList.add('visible'); else toggleAdminPanel(); } });
+
+        // ==================== Тема ====================
+        function toggleTheme() { isDarkTheme = !isDarkTheme; if (isDarkTheme) { document.body.classList.remove('light-theme'); localStorage.setItem('theme', 'dark'); } else { document.body.classList.add('light-theme'); localStorage.setItem('theme', 'light'); } updateThemeIcon(); }
+        function updateThemeIcon() { document.getElementById('themeBtn').textContent = isDarkTheme ? '🌞' : '🌙'; }
+
+        // ==================== Инициализация ====================
+        function init() {
             renderChapters();
-            saveToStorage();
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === currentFilter));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(`${btn.dataset.tab}-tab`).classList.add('active');
+                if (btn.dataset.tab === 'profile') { updateStatistics(); updateChart(); }
+            }));
+            document.querySelectorAll('.period-btn').forEach(btn => btn.addEventListener('click', () => {
+                document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                updateChart();
+            }));
+            document.getElementById('dailyGoal').value = dailyGoal;
+            updateStatistics();
+            updateChart();
+            updateBPCounter();
         }
-
-        function adminExpandAll() {
-            chapters.forEach(ch => ch.collapsed = false);
-            renderChapters();
-            saveToStorage();
-        }
-
-        function adminDeleteAllDone() {
-            chapters.forEach(ch => {
-                ch.tasks = ch.tasks.filter(t => 
-                    t.count ? t.current < t.count : !t.done
-                );
-            });
-            renderChapters();
-            updateAdminUI();
-            saveToStorage();
-        }
-
-        function adminClearAll() {
-            if (confirm('Удалить всё?')) {
-                chapters = [{
-                    id: generateId(),
-                    name: 'Основные задачи',
-                    collapsed: false,
-                    hidden: false,
-                    tasks: []
-                }];
-                renderChapters();
-                updateAdminUI();
-                saveToStorage();
-            }
-        }
-
-        function adminExport() {
-            const data = document.getElementById('importExportData');
-            data.select();
-            navigator.clipboard.writeText(data.value).then(() => alert('Скопировано!'));
-        }
-
-        function adminImport() {
-            const data = prompt('Вставьте скопированный список:');
-            if (data) {
-                try {
-                    chapters = JSON.parse(data);
-                    chapters.forEach(ch => {
-                        if (ch.hidden === undefined) ch.hidden = false;
-                        ch.tasks.forEach(t => {
-                            if (t.hidden === undefined) t.hidden = false;
-                        });
-                    });
-                    renderChapters();
-                    updateAdminUI();
-                    saveToStorage();
-                    alert('Импортировано!');
-                } catch (e) {
-                    alert('Ошибка!');
-                }
-            }
-        }
-
-        // Старт
-        renderChapters();
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.filter === currentFilter);
-        });
+        init();
     </script>
 </body>
 </html>
