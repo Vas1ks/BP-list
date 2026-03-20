@@ -8,7 +8,6 @@
     <!-- Chart.js для графиков -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        /* CSS переменные для тем */
         :root {
             --bg-color: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             --container-bg: rgba(30, 30, 30, 0.95);
@@ -62,7 +61,6 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* Вкладки */
         .tabs {
             max-width: 600px;
             margin: 20px auto 0;
@@ -104,7 +102,6 @@
             display: block;
         }
 
-        /* Профиль */
         .profile-header {
             text-align: center;
             margin-bottom: 24px;
@@ -209,8 +206,45 @@
             color: white;
             border-color: var(--accent-color);
         }
+        
+        /* Калькулятор прогноза */
+        .calculator {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            margin-top: 24px;
+        }
+        .calculator h3 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .calc-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .calc-row input {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 12px;
+        }
+        .calc-result {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .calc-result span {
+            color: var(--accent-color);
+            font-size: 24px;
+        }
 
-        /* BP счетчик сверху */
         .bp-header {
             max-width: 600px;
             margin: 20px auto;
@@ -306,7 +340,6 @@
             color: white;
         }
 
-        /* Фильтры */
         .filters {
             max-width: 600px;
             margin: 10px auto 20px;
@@ -349,7 +382,6 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* Стили для глав */
         .chapter {
             margin-bottom: 20px;
             border: 1px solid var(--border-color);
@@ -406,7 +438,6 @@
             transition: opacity 0.3s;
         }
 
-        /* --- ИДЕАЛЬНОЕ ВЫРАВНИВАНИЕ --- */
         .todo-item {
             display: flex;
             flex-direction: column;
@@ -620,10 +651,6 @@
         .modal.visible {
             display: block;
         }
-        .modal h3 {
-            margin-top: 0;
-            color: var(--text-color);
-        }
         .modal input, .modal textarea, .modal select {
             width: 100%;
             padding: 8px;
@@ -794,14 +821,12 @@
     </style>
 </head>
 <body>
-    <!-- Модалка для пароля -->
     <div class="password-modal" id="passwordModal">
         <h3 style="color: #4CAF50; text-align: center;">Вход в админ-панель</h3>
         <input type="password" id="passwordInput" placeholder="Введите пароль" onkeypress="if(event.key==='Enter') checkPassword()">
         <button class="admin-btn" onclick="checkPassword()" style="width: 100%;">Войти</button>
     </div>
 
-    <!-- Модалка для редактирования задачи -->
     <div class="modal" id="editTaskModal">
         <h3>✏️ Редактирование задачи</h3>
         <input type="text" id="editTaskText" placeholder="Текст задачи">
@@ -817,7 +842,6 @@
         </div>
     </div>
 
-    <!-- Модалка для настроек видимости -->
     <div class="modal" id="visibilityModal">
         <h3>👁️ Настройки видимости</h3>
         <div class="visibility-list" id="visibilityList"></div>
@@ -827,19 +851,16 @@
         </div>
     </div>
 
-    <!-- Меню переноса -->
     <div class="move-menu" id="moveMenu">
         <select id="moveChapterSelect"></select>
         <button onclick="moveTask()">Перенести</button>
     </div>
 
-    <!-- Вкладки -->
     <div class="tabs">
         <button class="tab-btn active" data-tab="tasks">📋 Задачи</button>
         <button class="tab-btn" data-tab="profile">👤 Профиль</button>
     </div>
 
-    <!-- Контент задач -->
     <div class="tab-content active" id="tasks-tab">
         <div class="bp-header">
             <div class="bp-bonuses">
@@ -870,7 +891,6 @@
         </div>
     </div>
 
-    <!-- Контент профиля -->
     <div class="tab-content" id="profile-tab">
         <div class="container" style="margin-top: 20px;">
             <div class="profile-header">
@@ -906,10 +926,20 @@
                     <button class="period-btn" data-period="month">Месяц</button>
                 </div>
             </div>
+
+            <div class="calculator">
+                <h3>🔮 Калькулятор прогноза</h3>
+                <div class="calc-row">
+                    <input type="date" id="forecastDate">
+                    <button class="save-goal-btn" onclick="calculateForecast()">Рассчитать прогноз</button>
+                </div>
+                <div class="calc-result" id="forecastResult">
+                    Выберите дату для прогноза
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Админ-панель -->
     <div class="admin-panel" id="adminPanel">
         <h2 class="admin-title">⚙️ Панель управления</h2>
         <div class="admin-section">
@@ -950,148 +980,91 @@
         </div>
     </div>
 
-    <!-- Футер -->
     <div class="footer">
         <a href="https://www.youtube.com/@vas1ks777" target="_blank" class="footer-item"><span>▶</span><span>YouTube</span></a>
         <a href="https://www.twitch.tv/vas1ks0_0" target="_blank" class="footer-item"><span>⚡</span><span>Twitch</span></a>
         <a href="https://www.donationalerts.com/r/vas1ks0_0" target="_blank" class="footer-item"><span>❤️</span><span>Donate</span></a>
     </div>
-        <script>
-        // ==================== Пароль админа ====================
-        const ADMIN_PASSWORD = "314159";
 
-        // ==================== ПОЛНЫЙ СПИСОК ЗАДАЧ ====================
+    <script>
+        const ADMIN_PASSWORD = "314159";
         const DEFAULT_CHAPTERS = [
-            {
-                id: "c1",
-                name: "Казино",
-                collapsed: false,
-                hidden: false,
-                tasks: [
-                    { id: "t1", text: "Поймать нули", done: false, bpValue: 2, description: "Выиграть в рулетке, поставив на 0 или 00", hidden: false },
-                    { id: "t2", text: "Мафия", done: false, bpValue: 3, description: "Сыграть в мафию в казино", hidden: false },
-                    { id: "t3", text: "Ставка в межсерверном колесе", done: false, bpValue: 3, description: "Поставить ставку в межсерверном колесе от 100 фишек", hidden: false }
-                ]
-            },
-            {
-                id: "c2",
-                name: "Пристань и спорт",
-                collapsed: false,
-                hidden: false,
-                tasks: [
-                    { id: "t4", text: "Большой теннис", done: false, bpValue: 1, description: "Постоять 1 минуту AFK в зоне", hidden: false },
-                    { id: "t5", text: "Пинг-понг", done: false, bpValue: 1, description: "Постоять 1 минуту AFK в зоне", hidden: false },
-                    { id: "t6", text: "Волейбол", done: false, bpValue: 1, description: "Постоять 1 минуту AFK в зоне", hidden: false },
-                    { id: "t7", text: "Поймать рыбу", count: 20, current: 0, bpValue: 4, description: "Поймать 20 рыб", hidden: false },
-                    { id: "t8", text: "Сокровище", done: false, bpValue: 1, description: "Найти сокровище (не мусор)", hidden: false },
-                    { id: "t9", text: "Футбол", count: 2, current: 0, bpValue: 1, description: "Забить 2 гола в футболе", hidden: false },
-                    { id: "t10", text: "Баскетбол", count: 2, current: 0, bpValue: 1, description: "Забросить 2 мяча в кольцо", hidden: false },
-                    { id: "t11", text: "Дартс", done: false, bpValue: 1, description: "Выиграть в дартсе", hidden: false }
-                ]
-            },
-            {
-                id: "c3",
-                name: "Работы",
-                collapsed: false,
-                hidden: false,
-                tasks: [
-                    { id: "t12", text: "Стройка", count: 25, current: 0, bpValue: 2, description: "Выполнить 25 действий", hidden: false },
-                    { id: "t13", text: "Порт", count: 25, current: 0, bpValue: 2, description: "Выполнить 25 действий", hidden: false },
-                    { id: "t14", text: "Шахта", count: 25, current: 0, bpValue: 2, description: "Выполнить 25 действий", hidden: false },
-                    { id: "t15", text: "Ферма", count: 10, current: 0, bpValue: 1, description: "Выполнить 10 действий", hidden: false },
-                    { id: "t16", text: "Рейсы на автобусе", count: 2, current: 0, bpValue: 2, description: "Проехать 2 круга", hidden: false },
-                    { id: "t17", text: "Пожарный", count: 25, current: 0, bpValue: 1, description: "Потушить 25 огоньков", hidden: false },
-                    { id: "t18", text: "Заказы на дальнобое", count: 3, current: 0, bpValue: 2, description: "Отвезти 3 заказа (не клубы)", hidden: false }
-                ]
-            },
-            {
-                id: "c4",
-                name: "Телефон",
-                collapsed: false,
-                hidden: false,
-                tasks: [
-                    { id: "t19", text: "Лотерея", done: false, bpValue: 1, description: "Купить лотерейный билет", hidden: false },
-                    { id: "t20", text: "Match", done: false, bpValue: 1, description: "Поставить лайк", hidden: false },
-                    { id: "t21", text: "Brawl", done: false, bpValue: 1, description: "Зайти в канал от 2 человек", hidden: false },
-                    { id: "t22", text: "Сайт", done: false, bpValue: 1, description: "Посетить любой сайт в браузере", hidden: false }
-                ]
-            },
-            {
-                id: "c5",
-                name: "Парные ВР",
-                collapsed: false,
-                hidden: false,
-                tasks: [
-                    { id: "t23", text: "Картинг", done: false, bpValue: 1, description: "Выиграть в заезде", hidden: false },
-                    { id: "t24", text: "ТК", count: 5, current: 0, bpValue: 1, description: "Выиграть 5 раз на ТК со ставкой от 100", hidden: false },
-                    { id: "t25", text: "Арена", count: 3, current: 0, bpValue: 1, description: "Выиграть 3 раза на арене со ставкой от 100", hidden: false },
-                    { id: "t26", text: "Гонка", done: false, bpValue: 1, description: "Финишировать в гонке со ставкой от 1000", hidden: false },
-                    { id: "t27", text: "Армрестлинг", done: false, bpValue: 1, description: "Выиграть в армрестлинг", hidden: false },
-                    { id: "t28", text: "Dance-battle", count: 3, current: 0, bpValue: 2, description: "Выиграть 3 дуэли в dance battle", hidden: false }
-                ]
-            },
-            {
-                id: "c6",
-                name: "Дель-Пьеро",
-                collapsed: false,
-                hidden: false,
-                tasks: [
-                    { id: "t29", text: "Аренда киностудии", done: false, bpValue: 2, description: "Арендовать киностудию", hidden: false },
-                    { id: "t30", text: "Тир", done: false, bpValue: 1, description: "Успешно пройти тренировку в тире", hidden: false },
-                    { id: "t31", text: "Кинотеатр", count: 5, current: 0, bpValue: 1, description: "Добавить 5 видео в кинотеатр", hidden: false },
-                    { id: "t32", text: "Лизинг", done: false, bpValue: 1, description: "Оплатить лизинг в банке", hidden: false }
-                ]
-            },
-            {
-                id: "c7",
-                name: "Питомец",
-                collapsed: false,
-                hidden: false,
-                tasks: [
-                    { id: "t33", text: "Кинуть мячик", count: 15, current: 0, bpValue: 2, description: "Кинуть 15 раз мячик питомцу", hidden: false },
-                    { id: "t34", text: "Команды", count: 15, current: 0, bpValue: 2, description: "Питомец должен правильно выполнить 15 команд", hidden: false }
-                ]
-            },
-            {
-                id: "c8",
-                name: "Долгие-затратные",
-                collapsed: false,
-                hidden: false,
-                tasks: [
-                    { id: "t35", text: "3 часа онлайн", count: 8, current: 0, bpValue: 2, isAccumulative: true, description: "Каждые 3 часа онлайн +2 BP", hidden: false },
-                    { id: "t36", text: "Тренажерный зал", count: 20, current: 0, bpValue: 1, description: "20 успешных подходов", hidden: false },
-                    { id: "t37", text: "Посылки", count: 10, current: 0, bpValue: 1, description: "10 раз отвезти почту", hidden: false },
-                    { id: "t38", text: "Смена внешности", count: 2, current: 0, bpValue: 2, description: "Оплатить 2 раза смену внешности у NPC хирурга в EMS", hidden: false },
-                    { id: "t39", text: "Метро", done: false, bpValue: 2, description: "Проехать 1 остановку на метро", hidden: false },
-                    { id: "t40", text: "Кейс за DP", done: false, bpValue: 10, description: "Открыть Silver/Gold/Drive case за DP", hidden: false },
-                    { id: "t41", text: "Задания клуба", count: 2, current: 0, bpValue: 4, description: "Выполнить 2 задания клуба", hidden: false },
-                    { id: "t42", text: "Охота", count: 5, current: 0, bpValue: 2, description: "Снять 5 раз 100% шкуру", hidden: false },
-                    { id: "t43", text: "Автосервис", done: false, bpValue: 1, description: "Починить любую деталь у собственного авто", hidden: false },
-                    { id: "t44", text: "Обезбол/Травка", done: false, bpValue: 4, description: "Положить 1 обезбол / посадить траву", hidden: false },
-                    { id: "t45", text: "AirDrop", count: 2, current: 0, bpValue: 4, description: "Заехать в желтую зону AirDrop", hidden: false },
-                    { id: "t46", text: "Чужое авто в автосервисе", done: false, bpValue: 2, description: "Починить любую деталь у чужого авто с прочностью < 90%", hidden: false },
-                    { id: "t47", text: "Материалы", done: false, bpValue: 1, description: "Включить и выключить заказ материалов на бизнес", hidden: false }
-                ]
-            },
-            {
-                id: "c9",
-                name: "Фракционные",
-                collapsed: false,
-                hidden: false,
-                tasks: [
-                    { id: "t48", text: "Граффити", count: 7, current: 0, bpValue: 1, description: "Закрасить 7 граффити", hidden: false },
-                    { id: "t49", text: "Контрабанда", count: 5, current: 0, bpValue: 2, description: "Сдать 5 контрабанды", hidden: false },
-                    { id: "t50", text: "Бизвар/Капт", count: 5, current: 0, bpValue: 1, description: "Участие в бизнес-вар / капт", hidden: false },
-                    { id: "t51", text: "Мед карты", count: 15, current: 0, bpValue: 2, description: "Выдать 15 мед карт в EMS", hidden: false },
-                    { id: "t52", text: "Вызовы", count: 15, current: 0, bpValue: 2, description: "Закрыть 15 вызовов в EMS", hidden: false },
-                    { id: "t53", text: "Объявления", count: 40, current: 0, bpValue: 2, description: "Отредактировать 40 объявлений в WN", hidden: false },
-                    { id: "t54", text: "Дома/угонки", count: 15, current: 0, bpValue: 2, description: "Взломать 15 замков в ограблении домов или угона авто", hidden: false },
-                    { id: "t55", text: "Коды", count: 5, current: 0, bpValue: 2, description: "Закрыть 5 кодов в силовой гос. структуре", hidden: false },
-                    { id: "t56", text: "Авто на учет", count: 2, current: 0, bpValue: 1, description: "Поставить 2 авто на учет", hidden: false },
-                    { id: "t57", text: "Арест", done: false, bpValue: 1, description: "Посадить в КПЗ", hidden: false },
-                    { id: "t58", text: "Выкуп из КПЗ", count: 2, current: 0, bpValue: 2, description: "Вытащить из КПЗ", hidden: false }
-                ]
-            }
+            { id: "c1", name: "Казино", collapsed: false, hidden: false, tasks: [
+                { id: "t1", text: "Поймать нули", done: false, bpValue: 2, description: "Выиграть в рулетке, поставив на 0 или 00", hidden: false },
+                { id: "t2", text: "Мафия", done: false, bpValue: 3, description: "Сыграть в мафию в казино", hidden: false },
+                { id: "t3", text: "Ставка в межсерверном колесе", done: false, bpValue: 3, description: "Поставить ставку в межсерверном колесе от 100 фишек", hidden: false }
+            ]},
+            { id: "c2", name: "Пристань и спорт", collapsed: false, hidden: false, tasks: [
+                { id: "t4", text: "Большой теннис", done: false, bpValue: 1, description: "Постоять 1 минуту AFK в зоне", hidden: false },
+                { id: "t5", text: "Пинг-понг", done: false, bpValue: 1, description: "Постоять 1 минуту AFK в зоне", hidden: false },
+                { id: "t6", text: "Волейбол", done: false, bpValue: 1, description: "Постоять 1 минуту AFK в зоне", hidden: false },
+                { id: "t7", text: "Поймать рыбу", count: 20, current: 0, bpValue: 4, description: "Поймать 20 рыб", hidden: false },
+                { id: "t8", text: "Сокровище", done: false, bpValue: 1, description: "Найти сокровище (не мусор)", hidden: false },
+                { id: "t9", text: "Футбол", count: 2, current: 0, bpValue: 1, description: "Забить 2 гола в футболе", hidden: false },
+                { id: "t10", text: "Баскетбол", count: 2, current: 0, bpValue: 1, description: "Забросить 2 мяча в кольцо", hidden: false },
+                { id: "t11", text: "Дартс", done: false, bpValue: 1, description: "Выиграть в дартсе", hidden: false }
+            ]},
+            { id: "c3", name: "Работы", collapsed: false, hidden: false, tasks: [
+                { id: "t12", text: "Стройка", count: 25, current: 0, bpValue: 2, description: "Выполнить 25 действий", hidden: false },
+                { id: "t13", text: "Порт", count: 25, current: 0, bpValue: 2, description: "Выполнить 25 действий", hidden: false },
+                { id: "t14", text: "Шахта", count: 25, current: 0, bpValue: 2, description: "Выполнить 25 действий", hidden: false },
+                { id: "t15", text: "Ферма", count: 10, current: 0, bpValue: 1, description: "Выполнить 10 действий", hidden: false },
+                { id: "t16", text: "Рейсы на автобусе", count: 2, current: 0, bpValue: 2, description: "Проехать 2 круга", hidden: false },
+                { id: "t17", text: "Пожарный", count: 25, current: 0, bpValue: 1, description: "Потушить 25 огоньков", hidden: false },
+                { id: "t18", text: "Заказы на дальнобое", count: 3, current: 0, bpValue: 2, description: "Отвезти 3 заказа (не клубы)", hidden: false }
+            ]},
+            { id: "c4", name: "Телефон", collapsed: false, hidden: false, tasks: [
+                { id: "t19", text: "Лотерея", done: false, bpValue: 1, description: "Купить лотерейный билет", hidden: false },
+                { id: "t20", text: "Match", done: false, bpValue: 1, description: "Поставить лайк", hidden: false },
+                { id: "t21", text: "Brawl", done: false, bpValue: 1, description: "Зайти в канал от 2 человек", hidden: false },
+                { id: "t22", text: "Сайт", done: false, bpValue: 1, description: "Посетить любой сайт в браузере", hidden: false }
+            ]},
+            { id: "c5", name: "Парные ВР", collapsed: false, hidden: false, tasks: [
+                { id: "t23", text: "Картинг", done: false, bpValue: 1, description: "Выиграть в заезде", hidden: false },
+                { id: "t24", text: "ТК", count: 5, current: 0, bpValue: 1, description: "Выиграть 5 раз на ТК со ставкой от 100", hidden: false },
+                { id: "t25", text: "Арена", count: 3, current: 0, bpValue: 1, description: "Выиграть 3 раза на арене со ставкой от 100", hidden: false },
+                { id: "t26", text: "Гонка", done: false, bpValue: 1, description: "Финишировать в гонке со ставкой от 1000", hidden: false },
+                { id: "t27", text: "Армрестлинг", done: false, bpValue: 1, description: "Выиграть в армрестлинг", hidden: false },
+                { id: "t28", text: "Dance-battle", count: 3, current: 0, bpValue: 2, description: "Выиграть 3 дуэли в dance battle", hidden: false }
+            ]},
+            { id: "c6", name: "Дель-Пьеро", collapsed: false, hidden: false, tasks: [
+                { id: "t29", text: "Аренда киностудии", done: false, bpValue: 2, description: "Арендовать киностудию", hidden: false },
+                { id: "t30", text: "Тир", done: false, bpValue: 1, description: "Успешно пройти тренировку в тире", hidden: false },
+                { id: "t31", text: "Кинотеатр", count: 5, current: 0, bpValue: 1, description: "Добавить 5 видео в кинотеатр", hidden: false },
+                { id: "t32", text: "Лизинг", done: false, bpValue: 1, description: "Оплатить лизинг в банке", hidden: false }
+            ]},
+            { id: "c7", name: "Питомец", collapsed: false, hidden: false, tasks: [
+                { id: "t33", text: "Кинуть мячик", count: 15, current: 0, bpValue: 2, description: "Кинуть 15 раз мячик питомцу", hidden: false },
+                { id: "t34", text: "Команды", count: 15, current: 0, bpValue: 2, description: "Питомец должен правильно выполнить 15 команд", hidden: false }
+            ]},
+            { id: "c8", name: "Долгие-затратные", collapsed: false, hidden: false, tasks: [
+                { id: "t35", text: "3 часа онлайн", count: 8, current: 0, bpValue: 2, isAccumulative: true, description: "Каждые 3 часа онлайн +2 BP", hidden: false },
+                { id: "t36", text: "Тренажерный зал", count: 20, current: 0, bpValue: 1, description: "20 успешных подходов", hidden: false },
+                { id: "t37", text: "Посылки", count: 10, current: 0, bpValue: 1, description: "10 раз отвезти почту", hidden: false },
+                { id: "t38", text: "Смена внешности", count: 2, current: 0, bpValue: 2, description: "Оплатить 2 раза смену внешности у NPC хирурга в EMS", hidden: false },
+                { id: "t39", text: "Метро", done: false, bpValue: 2, description: "Проехать 1 остановку на метро", hidden: false },
+                { id: "t40", text: "Кейс за DP", done: false, bpValue: 10, description: "Открыть Silver/Gold/Drive case за DP", hidden: false },
+                { id: "t41", text: "Задания клуба", count: 2, current: 0, bpValue: 4, description: "Выполнить 2 задания клуба", hidden: false },
+                { id: "t42", text: "Охота", count: 5, current: 0, bpValue: 2, description: "Снять 5 раз 100% шкуру", hidden: false },
+                { id: "t43", text: "Автосервис", done: false, bpValue: 1, description: "Починить любую деталь у собственного авто", hidden: false },
+                { id: "t44", text: "Обезбол/Травка", done: false, bpValue: 4, description: "Положить 1 обезбол / посадить траву", hidden: false },
+                { id: "t45", text: "AirDrop", count: 2, current: 0, bpValue: 4, description: "Заехать в желтую зону AirDrop", hidden: false },
+                { id: "t46", text: "Чужое авто в автосервисе", done: false, bpValue: 2, description: "Починить любую деталь у чужого авто с прочностью < 90%", hidden: false },
+                { id: "t47", text: "Материалы", done: false, bpValue: 1, description: "Включить и выключить заказ материалов на бизнес", hidden: false }
+            ]},
+            { id: "c9", name: "Фракционные", collapsed: false, hidden: false, tasks: [
+                { id: "t48", text: "Граффити", count: 7, current: 0, bpValue: 1, description: "Закрасить 7 граффити", hidden: false },
+                { id: "t49", text: "Контрабанда", count: 5, current: 0, bpValue: 2, description: "Сдать 5 контрабанды", hidden: false },
+                { id: "t50", text: "Бизвар/Капт", count: 5, current: 0, bpValue: 1, description: "Участие в бизнес-вар / капт", hidden: false },
+                { id: "t51", text: "Мед карты", count: 15, current: 0, bpValue: 2, description: "Выдать 15 мед карт в EMS", hidden: false },
+                { id: "t52", text: "Вызовы", count: 15, current: 0, bpValue: 2, description: "Закрыть 15 вызовов в EMS", hidden: false },
+                { id: "t53", text: "Объявления", count: 40, current: 0, bpValue: 2, description: "Отредактировать 40 объявлений в WN", hidden: false },
+                { id: "t54", text: "Дома/угонки", count: 15, current: 0, bpValue: 2, description: "Взломать 15 замков в ограблении домов или угона авто", hidden: false },
+                { id: "t55", text: "Коды", count: 5, current: 0, bpValue: 2, description: "Закрыть 5 кодов в силовой гос. структуре", hidden: false },
+                { id: "t56", text: "Авто на учет", count: 2, current: 0, bpValue: 1, description: "Поставить 2 авто на учет", hidden: false },
+                { id: "t57", text: "Арест", done: false, bpValue: 1, description: "Посадить в КПЗ", hidden: false },
+                { id: "t58", text: "Выкуп из КПЗ", count: 2, current: 0, bpValue: 2, description: "Вытащить из КПЗ", hidden: false }
+            ]}
         ];
 
         let chapters = JSON.parse(localStorage.getItem('chapters'));
@@ -1107,11 +1080,11 @@
         let vipActive = false;
         let currentFilter = localStorage.getItem('filter') || 'all';
 
-        // История BP
+        // История BP - используем только накопленные BP, а не текущий счетчик
         let bpHistory = JSON.parse(localStorage.getItem('bpHistory')) || {};
         let dailyGoal = parseInt(localStorage.getItem('dailyGoal')) || 150;
-        let lastBP = 0;
         let bpChart = null;
+        let lastRecordedTotal = 0;
 
         // Тема
         let isDarkTheme = localStorage.getItem('theme') !== 'light';
@@ -1127,39 +1100,48 @@
             const d = new Date();
             return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
         }
+        
         function getWeekKey() {
             const d = new Date();
             const start = new Date(d.getFullYear(), 0, 1);
             return `${d.getFullYear()}-W${Math.ceil((((d - start) / 86400000) + start.getDay() + 1) / 7)}`;
         }
+        
         function getMonthKey() {
             const d = new Date();
             return `${d.getFullYear()}-${d.getMonth()+1}`;
         }
+        
         function updateStatistics() {
             const today = getTodayKey();
             const week = getWeekKey();
             const month = getMonthKey();
             let todayTotal = 0, weekTotal = 0, monthTotal = 0;
+            
             for (let [date, val] of Object.entries(bpHistory)) {
-                if (date === today) todayTotal += val;
-                if (date.startsWith(week.split('-')[0]) && date.includes(week.split('-')[1])) weekTotal += val;
-                if (date.startsWith(month)) monthTotal += val;
+                const dateStr = date.split(' ')[0];
+                if (dateStr === today) todayTotal += val;
+                if (dateStr.startsWith(week.split('-')[0]) && dateStr.includes(week.split('-')[1])) weekTotal += val;
+                if (dateStr.startsWith(month)) monthTotal += val;
             }
+            
             document.getElementById('todayBp').textContent = todayTotal;
             document.getElementById('weekBp').textContent = weekTotal;
             document.getElementById('monthBp').textContent = monthTotal;
         }
+        
         function saveGoal() {
             dailyGoal = parseInt(document.getElementById('dailyGoal').value) || 0;
             localStorage.setItem('dailyGoal', dailyGoal);
             updateChart();
             alert('Цель сохранена!');
         }
+        
         function updateChart() {
             const period = document.querySelector('.period-btn.active')?.dataset.period || 'day';
             let labels = [], data = [], goalData = [];
             const now = new Date();
+            
             if (period === 'day') {
                 for (let i = 23; i >= 0; i--) {
                     const hour = new Date(now.getTime() - i * 3600000);
@@ -1167,7 +1149,7 @@
                     labels.push(hour.getHours() + ':00');
                     let hourTotal = 0;
                     for (let [dt, val] of Object.entries(bpHistory)) {
-                        if (dt.startsWith(key.split(' ')[0]) && dt.includes(key.split(' ')[1])) hourTotal += val;
+                        if (dt === key) hourTotal += val;
                     }
                     data.push(hourTotal);
                     goalData.push(dailyGoal / 24);
@@ -1178,7 +1160,9 @@
                     const key = `${day.getFullYear()}-${day.getMonth()+1}-${day.getDate()}`;
                     labels.push(day.toLocaleDateString('ru-RU', { weekday: 'short' }));
                     let dayTotal = 0;
-                    for (let [date, val] of Object.entries(bpHistory)) if (date.startsWith(key)) dayTotal += val;
+                    for (let [dt, val] of Object.entries(bpHistory)) {
+                        if (dt.startsWith(key)) dayTotal += val;
+                    }
                     data.push(dayTotal);
                     goalData.push(dailyGoal);
                 }
@@ -1188,11 +1172,14 @@
                     const key = `${day.getFullYear()}-${day.getMonth()+1}-${day.getDate()}`;
                     labels.push(day.getDate());
                     let dayTotal = 0;
-                    for (let [date, val] of Object.entries(bpHistory)) if (date.startsWith(key)) dayTotal += val;
+                    for (let [dt, val] of Object.entries(bpHistory)) {
+                        if (dt.startsWith(key)) dayTotal += val;
+                    }
                     data.push(dayTotal);
                     goalData.push(dailyGoal);
                 }
             }
+            
             if (bpChart) bpChart.destroy();
             const ctx = document.getElementById('bpChart').getContext('2d');
             bpChart = new Chart(ctx, {
@@ -1213,6 +1200,8 @@
                 }
             });
         }
+        
+        // Функция для записи заработанных BP
         function recordBP(amount) {
             const now = new Date();
             const key = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:00`;
@@ -1220,6 +1209,48 @@
             localStorage.setItem('bpHistory', JSON.stringify(bpHistory));
             updateStatistics();
             updateChart();
+        }
+        
+        // Функция прогноза
+        function calculateForecast() {
+            const targetDate = new Date(document.getElementById('forecastDate').value);
+            if (isNaN(targetDate.getTime())) {
+                document.getElementById('forecastResult').innerHTML = '❌ Выберите дату для прогноза';
+                return;
+            }
+            
+            const now = new Date();
+            if (targetDate < now) {
+                document.getElementById('forecastResult').innerHTML = '📅 Выберите будущую дату';
+                return;
+            }
+            
+            // Рассчитываем средний дневной заработок за последние 7 дней
+            let last7DaysTotal = 0;
+            let daysCount = 0;
+            for (let i = 1; i <= 7; i++) {
+                const day = new Date(now.getTime() - i * 86400000);
+                const key = `${day.getFullYear()}-${day.getMonth()+1}-${day.getDate()}`;
+                let dayTotal = 0;
+                for (let [dt, val] of Object.entries(bpHistory)) {
+                    if (dt.startsWith(key)) dayTotal += val;
+                }
+                if (dayTotal > 0 || i <= 3) {
+                    last7DaysTotal += dayTotal;
+                    daysCount++;
+                }
+            }
+            
+            const avgDaily = daysCount > 0 ? last7DaysTotal / daysCount : 0;
+            const daysDiff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
+            const currentTotal = Object.values(bpHistory).reduce((a, b) => a + b, 0);
+            const forecastBP = Math.round(currentTotal + avgDaily * daysDiff);
+            
+            document.getElementById('forecastResult').innerHTML = `
+                📈 Прогноз на ${targetDate.toLocaleDateString('ru-RU')}:<br>
+                <span>${forecastBP} BP</span><br>
+                <small style="font-size: 12px;">Средний дневной заработок: ${Math.round(avgDaily)} BP</small>
+            `;
         }
 
         // ==================== BP и бонусы ====================
@@ -1243,17 +1274,24 @@
             if (vipActive) multiplier *= 2;
             return total * multiplier;
         }
+        
+        let lastTotal = 0;
         function updateBPCounter() {
             const total = calculateTotalBP();
-            if (total > lastBP) recordBP(total - lastBP);
-            lastBP = total;
+            // Записываем разницу только если она положительная и больше 0
+            if (total > lastTotal && (total - lastTotal) > 0) {
+                recordBP(total - lastTotal);
+            }
+            lastTotal = total;
             document.getElementById('bpTotal').textContent = total;
         }
+        
         function toggleBonus(bonus) {
             if (bonus === 'x2') { x2Active = !x2Active; document.getElementById('x2Btn').classList.toggle('active'); }
             else if (bonus === 'vip') { vipActive = !vipActive; document.getElementById('vipBtn').classList.toggle('active'); }
             renderChapters(); updateBPCounter();
         }
+        
         function setFilter(filter) { currentFilter = filter; localStorage.setItem('filter', filter); renderChapters(); }
         function filterTask(t) {
             if (currentFilter === 'all') return true;
@@ -1261,22 +1299,33 @@
             if (currentFilter === 'completed') return t.count ? t.current >= t.count : t.done;
             return true;
         }
+        
         function restartTasks() {
             if (confirm('Сбросить все галочки и счётчики?')) {
                 chapters.forEach(ch => ch.tasks.forEach(t => { if (t.count) t.current = 0; else t.done = false; }));
-                renderChapters(); updateAdminUI(); saveToStorage(); alert('Готово!');
+                renderChapters(); updateAdminUI(); saveToStorage(); 
+                // Не сбрасываем историю BP при обычном рестарте
+                alert('Готово!');
             }
         }
+        
         function hardRestartTasks() {
-            if (confirm('ПОЛНЫЙ СБРОС: Вернуть всё к состоянию по умолчанию?')) {
+            if (confirm('ПОЛНЫЙ СБРОС: Вернуть всё к состоянию по умолчанию? Это также очистит историю BP!')) {
                 localStorage.removeItem('chapters');
+                localStorage.removeItem('bpHistory');
+                bpHistory = {};
+                lastTotal = 0;
                 chapters = JSON.parse(JSON.stringify(DEFAULT_CHAPTERS));
-                renderChapters(); updateAdminUI(); alert('Готово!');
+                renderChapters(); updateAdminUI(); 
+                updateStatistics();
+                updateChart();
+                alert('Готово!');
             }
         }
+        
         function saveToStorage() { localStorage.setItem('chapters', JSON.stringify(chapters)); }
 
-        // ==================== Рендеринг ====================
+        // ==================== Рендеринг задач (сокращен для длины) ====================
         function renderChapters() {
             const container = document.getElementById('chaptersList');
             container.innerHTML = '';
@@ -1338,7 +1387,7 @@
             if (isAdmin) setTimeout(() => { document.querySelectorAll('.chapter-tasks').forEach(tc => new Sortable(tc, { group: 'tasks', animation: 200, onEnd: () => saveToStorage() })); }, 100);
         }
 
-        // ==================== Админ функции ====================
+        // ==================== Админ функции (сокращены) ====================
         function addChapter() { let n = document.getElementById('newChapterName').value.trim(); if (n) { chapters.push({ id: generateId(), name: n, collapsed: false, hidden: false, tasks: [] }); document.getElementById('newChapterName').value = ''; renderChapters(); updateAdminUI(); saveToStorage(); } }
         function deleteChapter(id) { if (chapters.length <= 1) { alert('Нельзя удалить последнюю главу!'); return; } chapters = chapters.filter(ch => ch.id !== id); renderChapters(); updateAdminUI(); saveToStorage(); }
         function editChapterTitle(id, newTitle) { let ch = chapters.find(c => c.id === id); if (ch) { ch.name = newTitle; renderChapters(); updateAdminUI(); saveToStorage(); } }
@@ -1380,6 +1429,10 @@
 
         // ==================== Инициализация ====================
         function init() {
+            // Восстанавливаем lastTotal из истории
+            lastTotal = Object.values(bpHistory).reduce((a, b) => a + b, 0);
+            document.getElementById('bpTotal').textContent = lastTotal;
+            
             renderChapters();
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === currentFilter));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
@@ -1397,7 +1450,6 @@
             document.getElementById('dailyGoal').value = dailyGoal;
             updateStatistics();
             updateChart();
-            updateBPCounter();
         }
         init();
     </script>
